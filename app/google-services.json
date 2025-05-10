@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "132194134353",
+    "project_id": "pamu-ead38",
+    "storage_bucket": "pamu-ead38.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132194134353:android:5c178f23a0046468d44b70",
+        "android_client_info": {
+          "package_name": "ba.sum.fpmoz.pamu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-iw-NZ0l6d6eA3RicB-qFUX__EwyKmqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
