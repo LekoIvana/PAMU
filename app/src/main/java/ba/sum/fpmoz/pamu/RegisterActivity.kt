@@ -9,13 +9,21 @@ import android.util.Patterns
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val RC_SIGN_IN = 100
+
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var passwordToggle: ImageButton
@@ -24,6 +32,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var confirmPasswordEditText: EditText
     private lateinit var userName: EditText
     private lateinit var confirmPasswordToggle: ImageButton
+    private lateinit var googleIcon: ImageView
 
     private var confirmPasswordVisible = false
     private var passwordVisible = false
@@ -34,7 +43,14 @@ class RegisterActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
+        // 🔹 Google Sign-In konfiguracija
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        // 🔹 UI elementi
         userName = findViewById(R.id.userName)
         emailEditText = findViewById(R.id.emailEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
@@ -43,10 +59,15 @@ class RegisterActivity : AppCompatActivity() {
         registerButton = findViewById(R.id.registerButton)
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText)
         confirmPasswordToggle = findViewById(R.id.confirmPasswordToggle)
+        googleIcon = findViewById(R.id.googleIcon)
 
+        // 🔹 Google ikona klik
+        googleIcon.setOnClickListener {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        }
 
-
-
+        // 🔹 Validacija emaila
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val email = s.toString()
@@ -63,7 +84,7 @@ class RegisterActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-
+        // 🔹 Toggle lozinke
         passwordToggle.setOnClickListener {
             passwordVisible = !passwordVisible
             if (passwordVisible) {
@@ -97,14 +118,11 @@ class RegisterActivity : AppCompatActivity() {
             finish()
         }
 
-
-
         registerButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
             val name = userName.text.toString().trim()
             val confirmPassword = confirmPasswordEditText.text.toString().trim()
-
 
             if (email.isEmpty() || password.isEmpty() || name.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
@@ -115,6 +133,7 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
             if (password != confirmPassword) {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -151,5 +170,34 @@ class RegisterActivity : AppCompatActivity() {
                     }
                 }
         }
+    }
+
+    // 🔹 Rezultat iz Google prijave
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Toast.makeText(this, "Google prijava neuspješna: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    // 🔹 Google token → Firebase login
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    startActivity(Intent(this, WelcomeActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Firebase prijava neuspješna.", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 }
