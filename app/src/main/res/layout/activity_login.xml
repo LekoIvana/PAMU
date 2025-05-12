@@ -122,8 +122,8 @@
                 android:layout_marginBottom="24dp">
 
 
-
                 <TextView
+                    android:id="@+id/goToForgotPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Zaboravljena lozinka?"

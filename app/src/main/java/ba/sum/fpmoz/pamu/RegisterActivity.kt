@@ -33,6 +33,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var userName: EditText
     private lateinit var confirmPasswordToggle: ImageButton
     private lateinit var googleIcon: ImageView
+    private lateinit var ForgotPassword: TextView
 
     private var confirmPasswordVisible = false
     private var passwordVisible = false
@@ -60,6 +61,7 @@ class RegisterActivity : AppCompatActivity() {
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText)
         confirmPasswordToggle = findViewById(R.id.confirmPasswordToggle)
         googleIcon = findViewById(R.id.googleIcon)
+        ForgotPassword = findViewById(R.id.ForgotPassword)
 
         
         googleIcon.setOnClickListener {
@@ -118,6 +120,11 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
+        }
+
+        ForgotPassword.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
         }
 
         registerButton.setOnClickListener {

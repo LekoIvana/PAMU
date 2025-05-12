@@ -16,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var passwordToggle: ImageButton
     private lateinit var goToRegister: TextView
+    private lateinit var goToForgotPassword: TextView
 
     private var passwordVisible = false
 
@@ -32,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
         loginButton = findViewById(R.id.loginButton)
         passwordToggle = findViewById(R.id.passwordToggle)
         goToRegister = findViewById(R.id.goToRegister)
+        goToForgotPassword = findViewById(R.id.goToForgotPassword)
 
 
         passwordToggle.setOnClickListener {
@@ -83,6 +85,12 @@ class LoginActivity : AppCompatActivity() {
 
         goToRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        goToForgotPassword.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
             startActivity(intent)
             finish()
         }
