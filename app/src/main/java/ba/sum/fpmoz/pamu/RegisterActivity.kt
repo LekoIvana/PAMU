@@ -43,14 +43,14 @@ class RegisterActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // 🔹 Google Sign-In konfiguracija
+        
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // 🔹 UI elementi
+        
         userName = findViewById(R.id.userName)
         emailEditText = findViewById(R.id.emailEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
@@ -61,13 +61,15 @@ class RegisterActivity : AppCompatActivity() {
         confirmPasswordToggle = findViewById(R.id.confirmPasswordToggle)
         googleIcon = findViewById(R.id.googleIcon)
 
-        // 🔹 Google ikona klik
+        
         googleIcon.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            googleSignInClient.signOut().addOnCompleteListener {
+                val signInIntent = googleSignInClient.signInIntent
+                startActivityForResult(signInIntent, RC_SIGN_IN)
+            }
         }
 
-        // 🔹 Validacija emaila
+        
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val email = s.toString()
@@ -84,7 +86,7 @@ class RegisterActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // 🔹 Toggle lozinke
+        
         passwordToggle.setOnClickListener {
             passwordVisible = !passwordVisible
             if (passwordVisible) {
@@ -172,7 +174,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    // 🔹 Rezultat iz Google prijave
+    
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -187,7 +189,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    // 🔹 Google token → Firebase login
+    
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
