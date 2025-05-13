@@ -27,30 +27,37 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
+    }
+
+    // ✅ Dodano za prepoznavanje Java/Kotlin direktorija
+    sourceSets {
+        getByName("main") {
+            java.srcDirs("src/main/java")
+        }
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
     implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.9.1")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
-
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
-    implementation("com.google.firebase:firebase-auth-ktx")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

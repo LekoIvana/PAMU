@@ -44,14 +44,14 @@ class RegisterActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        
+
         userName = findViewById(R.id.userName)
         emailEditText = findViewById(R.id.emailEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
@@ -63,7 +63,7 @@ class RegisterActivity : AppCompatActivity() {
         googleIcon = findViewById(R.id.googleIcon)
         ForgotPassword = findViewById(R.id.ForgotPassword)
 
-        
+
         googleIcon.setOnClickListener {
             googleSignInClient.signOut().addOnCompleteListener {
                 val signInIntent = googleSignInClient.signInIntent
@@ -71,7 +71,7 @@ class RegisterActivity : AppCompatActivity() {
             }
         }
 
-        
+
         emailEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val email = s.toString()
@@ -88,7 +88,7 @@ class RegisterActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        
+
         passwordToggle.setOnClickListener {
             passwordVisible = !passwordVisible
             if (passwordVisible) {
@@ -181,7 +181,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -196,14 +196,32 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    
+
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    startActivity(Intent(this, WelcomeActivity::class.java))
-                    finish()
+                    val user = auth.currentUser
+                    user?.let {
+                        val db = Firebase.firestore
+                        val userData = hashMapOf(
+                            "userName" to (it.displayName ?: ""),
+                            "email" to (it.email ?: ""),
+                            "uid" to it.uid,
+                            "photoUrl" to (it.photoUrl?.toString() ?: ""),
+                            "datumPrijave" to com.google.firebase.Timestamp.now()
+                        )
+                        db.collection("users").document(it.uid).set(userData)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Dobrodošli ${user.displayName}", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, WelcomeActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Neuspješno spremanje korisnika: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                    }
                 } else {
                     Toast.makeText(this, "Firebase prijava neuspješna.", Toast.LENGTH_SHORT).show()
                 }
