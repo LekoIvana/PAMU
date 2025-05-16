@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:text="Registracija"
                     android:textSize="28sp"
-                    android:textColor="#1B5E20"
+                    android:textColor="#89135b"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif-medium"
                     android:layout_marginBottom="4dp" />
@@ -64,18 +64,7 @@
                     android:fontFamily="sans-serif" />
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivIllustration"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="-30dp"
-                android:adjustViewBounds="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/login25"
-                android:contentDescription="Illustration"
-                android:rotation="-6" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -226,7 +215,7 @@
             android:text="Registracija"
             android:pointerIcon="hand"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#1B5E20"
+            android:backgroundTint="#89135b"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
@@ -246,7 +235,7 @@
                 android:layout_height="wrap_content"
 
                 android:text="Zaboravljena lozinka?"
-                android:textColor="#1B5E20"
+                android:textColor="#89135b"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -299,11 +288,7 @@
                 android:clickable="true"
                 android:focusable="true" />
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_facebook"
-                android:layout_margin="8dp" />
+
 
 
         </LinearLayout>
@@ -326,7 +311,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Prijavi se!"
-                android:textColor="#1B5E20"
+                android:textColor="#89135b"
                 android:textStyle="bold" />
         </LinearLayout>
 
