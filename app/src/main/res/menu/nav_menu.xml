@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Korisničke stavke -->
     <item
         android:id="@+id/nav_appointments"
         android:title="Moje rezervacije"
         android:icon="@drawable/ic_calendar" />
 
+    <!-- Admin-only stavke -->
     <item
-        android:id="@+id/nav_logout"
-        android:title="Odjava"
-        android:icon="@drawable/ic_logout" />
+        android:id="@+id/nav_add_service"
+        android:title="Dodaj uslugu"
+        android:icon="@drawable/ic_add" />
+
+    <item
+        android:id="@+id/nav_manage_users"
+        android:title="Upravljanje korisnicima"
+        android:icon="@drawable/ic_group" />
+
+    <item
+        android:id="@+id/nav_admin_panel"
+        android:title="Admin panel"
+        android:icon="@drawable/ic_settings" />
+
+
+    <!-- Zajedničke -->
     <item
         android:id="@+id/nav_settings"
         android:title="Postavke"
         android:icon="@drawable/ic_settings" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Odjava"
+        android:icon="@drawable/ic_logout" />
 </menu>

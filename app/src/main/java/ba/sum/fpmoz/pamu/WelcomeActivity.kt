@@ -31,10 +31,36 @@ class WelcomeActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Početna"
 
-
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
 
+        // 🧹 Očisti stari meni i učitaj novi
+        navigationView.menu.clear()
+        navigationView.inflateMenu(R.menu.nav_menu)
+
+        // Dohvati korisnika i provjeri ulogu
+        val db = FirebaseFirestore.getInstance()
+        val currentUserUid = auth.currentUser?.uid
+
+        if (currentUserUid != null) {
+            db.collection("users").document(currentUserUid).get()
+                .addOnSuccessListener { document ->
+                    val role = document.getString("role")
+                    val menu = navigationView.menu
+
+                    if (role == "admin") {
+                        menu.findItem(R.id.nav_appointments)?.isVisible = false
+                    } else {
+                        menu.findItem(R.id.nav_add_service)?.isVisible = false
+                        menu.findItem(R.id.nav_manage_users)?.isVisible = false
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Greška pri dohvaćanju uloge", Toast.LENGTH_SHORT).show()
+                }
+        }
+
+        // Navigation drawer toggle
         val toggle = androidx.appcompat.app.ActionBarDrawerToggle(
             this, drawerLayout, toolbar,
             R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -42,16 +68,15 @@ class WelcomeActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-
+        // Ime i email u navigation headeru
         val headerView = navigationView.getHeaderView(0)
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
 
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = auth.currentUser
         val uid = user?.uid
 
         if (uid != null) {
-            val db = FirebaseFirestore.getInstance()
             val userDocRef = db.collection("users").document(uid)
 
             userDocRef.get().addOnSuccessListener { document ->
@@ -71,7 +96,6 @@ class WelcomeActivity : AppCompatActivity() {
             }
         }
 
-
         // Klikovi u meniju
         navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
@@ -89,30 +113,47 @@ class WelcomeActivity : AppCompatActivity() {
                     Toast.makeText(this, "Prikaz termina (uskoro dostupno)", Toast.LENGTH_SHORT).show()
                     true
                 }
+                R.id.nav_add_service -> {
+                    startActivity(Intent(this, AddServiceActivity::class.java))
+                    true
+                }
+                R.id.nav_admin_panel -> {
+                    startActivity(Intent(this, AdminPanelActivity::class.java))
+                    true
+                }
+
+
+                R.id.nav_manage_users -> {
+                    Toast.makeText(this, "Otvaranje Upravljanje korisnicima (admin)", Toast.LENGTH_SHORT).show()
+                    // startActivity(Intent(this, ManageUsersActivity::class.java))
+                    true
+                }
                 else -> false
             }
         }
 
-
-        // Prikaz usluga
+        // Prikaz usluga iz Firestore-a
         recyclerView = findViewById(R.id.serviceRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val services = listOf(
-            Service("Balayage", "Tehnika bojenja s prirodnim prijelazima.", R.drawable.balayage),
-            Service("Svečana frizura", "Elegantne frizure za posebne prilike.", R.drawable.balayage),
-            Service("Šišanje", "Moderna i klasična šišanja po želji.", R.drawable.balayage),
-            Service("Nokti", "Ugradnja i njega umjetnih noktiju.", R.drawable.balayage),
-            Service("Manikura", "Njega prirodnih noktiju i ruku.", R.drawable.balayage),
-            Service("Pedikura", "Estetska i medicinska njega stopala.", R.drawable.balayage)
-        )
+        db.collection("services").get()
+            .addOnSuccessListener { result ->
+                val services = mutableListOf<Service>()
+                for (document in result) {
+                    val name = document.getString("name") ?: "N/A"
+                    val description = document.getString("description") ?: ""
+                    val imageRes = R.drawable.balayage // Placeholder slika
+                    services.add(Service(name, description, imageRes))
+                }
 
-        recyclerView.adapter = ServiceAdapter(services) { service ->
-            Toast.makeText(this, "Odabrano: ${service.name}", Toast.LENGTH_SHORT).show()
-        }
+                recyclerView.adapter = ServiceAdapter(services) { service ->
+                    Toast.makeText(this, "Odabrano: ${service.name}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Greška pri učitavanju usluga", Toast.LENGTH_SHORT).show()
+            }
     }
-
-
 
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
