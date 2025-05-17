@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_appointments"
+        android:title="Moje rezervacije"
+        android:icon="@drawable/ic_calendar" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Odjava"
+        android:icon="@drawable/ic_logout" />
+    <item
+        android:id="@+id/nav_settings"
+        android:title="Postavke"
+        android:icon="@drawable/ic_settings" />
+</menu>

@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">pamu</string>
     <string name="default_web_client_id">132194134353-o98agtvbi6a0tdqjrvjouq0r5tmbti4m.apps.googleusercontent.com</string>
+    <string name="navigation_drawer_open">Otvori navigaciju</string>
+    <string name="navigation_drawer_close">Zatvori navigaciju</string>
+
 </resources>
