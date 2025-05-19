@@ -46,18 +46,23 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { documents ->
                     if (documents.isEmpty) {
-                        // Korisnik s tim emailom ne postoji
                         Toast.makeText(this, "Korisnik s tim emailom ne postoji", Toast.LENGTH_LONG).show()
                     } else {
-                        // Ako korisnik postoji, šaljemo email za resetiranje lozinke
-                        auth.sendPasswordResetEmail(email)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Toast.makeText(this, "Email za resetovanje lozinke je poslan", Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(this, "Došlo je do pogreške, pokušajte ponovo", Toast.LENGTH_LONG).show()
+                        val userDoc = documents.documents[0]
+                        val isGoogleSignIn = userDoc.getBoolean("googleSignIn") ?: false
+
+                        if (isGoogleSignIn) {
+                            Toast.makeText(this, "Korisnik je prijavljen putem Google računa", Toast.LENGTH_LONG).show()
+                        } else {
+                            auth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(this, "Email za resetovanje lozinke je poslan", Toast.LENGTH_LONG).show()
+                                    } else {
+                                        Toast.makeText(this, "Došlo je do pogreške, pokušajte ponovo", Toast.LENGTH_LONG).show()
+                                    }
                                 }
-                            }
+                        }
                     }
                 }
                 .addOnFailureListener {

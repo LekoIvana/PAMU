@@ -211,7 +211,8 @@ class RegisterActivity : AppCompatActivity() {
                             "email" to (it.email ?: ""),
                             "uid" to it.uid,
                             "photoUrl" to (it.photoUrl?.toString() ?: ""),
-                            "datumPrijave" to com.google.firebase.Timestamp.now()
+                            "datumPrijave" to com.google.firebase.Timestamp.now(),
+                            "googleSignIn" to true
                         )
                         db.collection("users").document(it.uid).set(userData)
                             .addOnSuccessListener {

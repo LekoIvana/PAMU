@@ -50,9 +50,11 @@ class WelcomeActivity : AppCompatActivity() {
 
                     if (role == "admin") {
                         menu.findItem(R.id.nav_appointments)?.isVisible = false
+                        menu.findItem(R.id.nav_admin_reservations)?.isVisible = true
                     } else {
                         menu.findItem(R.id.nav_add_service)?.isVisible = false
                         menu.findItem(R.id.nav_manage_users)?.isVisible = false
+                        menu.findItem(R.id.nav_admin_reservations)?.isVisible = false
                     }
                 }
                 .addOnFailureListener {
@@ -109,10 +111,15 @@ class WelcomeActivity : AppCompatActivity() {
                     startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
-                R.id.nav_appointments -> {
-                    Toast.makeText(this, "Prikaz termina (uskoro dostupno)", Toast.LENGTH_SHORT).show()
+                R.id.nav_admin_reservations -> {
+                    startActivity(Intent(this, ReservationsAdminActivity::class.java))
                     true
                 }
+                R.id.nav_appointments -> {
+                    startActivity(Intent(this, UserReservationsActivity::class.java))
+                    true
+                }
+
                 R.id.nav_add_service -> {
                     startActivity(Intent(this, AddServiceActivity::class.java))
                     true
@@ -147,7 +154,9 @@ class WelcomeActivity : AppCompatActivity() {
                 }
 
                 recyclerView.adapter = ServiceAdapter(services) { service ->
-                    Toast.makeText(this, "Odabrano: ${service.name}", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, ReservationsActivity::class.java)
+                    intent.putExtra("selectedCategory", service.name) // šalje ime kao kategoriju
+                    startActivity(intent)
                 }
             }
             .addOnFailureListener {

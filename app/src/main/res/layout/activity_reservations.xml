@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ReservationsActivity">
+
+    <!-- Toolbar fiksiran na vrhu -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/reservationsToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#89135b"
+        android:title=""
+        android:titleTextColor="#F2EEEE" />
+
+    <!-- Skrolabilni sadržaj -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:id="@+id/selectedDateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="Odaberite datum"
+                android:textColor="#89135b"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- ListView za termine -->
+            <ListView
+                android:id="@+id/timeListView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                android:divider="@android:color/darker_gray"
+                android:dividerHeight="1dp" />
+
+            <EditText
+                android:id="@+id/noteEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Unesite napomenu"
+                android:paddingTop="12dp"
+                android:textColor="#89135b"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/submitReservationButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#89135b"
+                android:text="Rezerviraj termin"
+                android:textColor="#F2EEEE"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+
