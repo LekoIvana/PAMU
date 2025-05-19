@@ -67,15 +67,26 @@ class UsersFragment : Fragment() {
     }
 
     private fun toggleRole(user: User) {
-        val newRole = if (user.role == "admin") "user" else "admin"
-        db.collection("users").document(user.uid)
-            .update("role", newRole)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Uloga promijenjena", Toast.LENGTH_SHORT).show()
-                fetchUsers()
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Greška pri izmjeni uloge", Toast.LENGTH_SHORT).show()
-            }
+        val options = arrayOf("user", "admin")
+        val currentRoleIndex = if (user.role == "admin") 1 else 0
+
+        val builder = android.app.AlertDialog.Builder(requireContext())
+        builder.setTitle("Odaberi novu ulogu za ${user.userName}")
+        builder.setSingleChoiceItems(options, currentRoleIndex) { dialog, which ->
+            val selectedRole = options[which]
+            db.collection("users").document(user.uid)
+                .update("role", selectedRole)
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Uloga promijenjena", Toast.LENGTH_SHORT).show()
+                    fetchUsers()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Greška pri izmjeni uloge", Toast.LENGTH_SHORT).show()
+                }
+            dialog.dismiss()
+        }
+        builder.setNegativeButton("Odustani") { dialog, _ -> dialog.dismiss() }
+        builder.show()
     }
+
 }

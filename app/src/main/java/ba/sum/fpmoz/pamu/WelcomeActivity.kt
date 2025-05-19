@@ -34,11 +34,9 @@ class WelcomeActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
 
-        // 🧹 Očisti stari meni i učitaj novi
         navigationView.menu.clear()
         navigationView.inflateMenu(R.menu.nav_menu)
 
-        // Dohvati korisnika i provjeri ulogu
         val db = FirebaseFirestore.getInstance()
         val currentUserUid = auth.currentUser?.uid
 
@@ -48,13 +46,17 @@ class WelcomeActivity : AppCompatActivity() {
                     val role = document.getString("role")
                     val menu = navigationView.menu
 
+                    // Uvijek sakrij "Dodaj uslugu" i "Upravljanje korisnicima"
+                    menu.findItem(R.id.nav_add_service)?.isVisible = false
+                    menu.findItem(R.id.nav_manage_users)?.isVisible = false
+
                     if (role == "admin") {
                         menu.findItem(R.id.nav_appointments)?.isVisible = false
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = true
+                        menu.findItem(R.id.nav_admin_panel)?.isVisible = true
                     } else {
-                        menu.findItem(R.id.nav_add_service)?.isVisible = false
-                        menu.findItem(R.id.nav_manage_users)?.isVisible = false
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = false
+                        menu.findItem(R.id.nav_admin_panel)?.isVisible = false
                     }
                 }
                 .addOnFailureListener {
@@ -62,7 +64,6 @@ class WelcomeActivity : AppCompatActivity() {
                 }
         }
 
-        // Navigation drawer toggle
         val toggle = androidx.appcompat.app.ActionBarDrawerToggle(
             this, drawerLayout, toolbar,
             R.string.navigation_drawer_open, R.string.navigation_drawer_close
@@ -70,7 +71,6 @@ class WelcomeActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        // Ime i email u navigation headeru
         val headerView = navigationView.getHeaderView(0)
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
@@ -80,7 +80,6 @@ class WelcomeActivity : AppCompatActivity() {
 
         if (uid != null) {
             val userDocRef = db.collection("users").document(uid)
-
             userDocRef.get().addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val name = document.getString("userName")
@@ -98,7 +97,6 @@ class WelcomeActivity : AppCompatActivity() {
             }
         }
 
-        // Klikovi u meniju
         navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_logout -> {
@@ -119,27 +117,14 @@ class WelcomeActivity : AppCompatActivity() {
                     startActivity(Intent(this, UserReservationsActivity::class.java))
                     true
                 }
-
-                R.id.nav_add_service -> {
-                    startActivity(Intent(this, AddServiceActivity::class.java))
-                    true
-                }
                 R.id.nav_admin_panel -> {
                     startActivity(Intent(this, AdminPanelActivity::class.java))
-                    true
-                }
-
-
-                R.id.nav_manage_users -> {
-                    Toast.makeText(this, "Otvaranje Upravljanje korisnicima (admin)", Toast.LENGTH_SHORT).show()
-                    // startActivity(Intent(this, ManageUsersActivity::class.java))
                     true
                 }
                 else -> false
             }
         }
 
-        // Prikaz usluga iz Firestore-a
         recyclerView = findViewById(R.id.serviceRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -149,13 +134,13 @@ class WelcomeActivity : AppCompatActivity() {
                 for (document in result) {
                     val name = document.getString("name") ?: "N/A"
                     val description = document.getString("description") ?: ""
-                    val imageRes = R.drawable.balayage // Placeholder slika
+                    val imageRes = R.drawable.balayage
                     services.add(Service(name, description, imageRes))
                 }
 
                 recyclerView.adapter = ServiceAdapter(services) { service ->
                     val intent = Intent(this, ReservationsActivity::class.java)
-                    intent.putExtra("selectedCategory", service.name) // šalje ime kao kategoriju
+                    intent.putExtra("selectedCategory", service.name)
                     startActivity(intent)
                 }
             }

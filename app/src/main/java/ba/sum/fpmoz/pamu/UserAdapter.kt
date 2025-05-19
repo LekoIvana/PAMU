@@ -16,6 +16,7 @@ class UserAdapter(
     inner class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val userNameText: TextView = view.findViewById(R.id.userNameText)
         val userEmailText: TextView = view.findViewById(R.id.userEmailText)
+        val userRoleText: TextView = view.findViewById(R.id.userRoleText)
         val deleteBtn: ImageButton = view.findViewById(R.id.deleteUserBtn)
         val roleBtn: ImageButton = view.findViewById(R.id.editRoleBtn)
     }
@@ -33,6 +34,7 @@ class UserAdapter(
 
         holder.userNameText.text = user.userName
         holder.userEmailText.text = user.email
+        holder.userRoleText.text = "Uloga: ${user.role ?: "user"}"
 
         holder.deleteBtn.setOnClickListener { onDeleteClick(user) }
         holder.roleBtn.setOnClickListener { onRoleChangeClick(user) }
