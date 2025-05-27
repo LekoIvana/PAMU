@@ -121,6 +121,14 @@ class WelcomeActivity : AppCompatActivity() {
                     startActivity(Intent(this, AdminPanelActivity::class.java))
                     true
                 }
+                R.id.nav_location -> {
+                    startActivity(Intent(this, LocationActivity::class.java))
+                    true
+                }
+                R.id.nav_contact -> {
+                    startActivity(Intent(this, ContactActivity::class.java))
+                    true
+                }
                 else -> false
             }
         }

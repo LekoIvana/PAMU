@@ -37,8 +37,18 @@
         android:title="Postavke"
         android:icon="@drawable/ic_settings" />
 
+
+    <item
+        android:id="@+id/nav_location"
+        android:title="Lokacija salona"
+        android:icon="@drawable/ic_location" />
+    <item
+        android:id="@+id/nav_contact"
+        android:title="Kontakt"
+        android:icon="@drawable/ic_contact" />
     <item
         android:id="@+id/nav_logout"
         android:title="Odjava"
         android:icon="@drawable/ic_logout" />
+
 </menu>
