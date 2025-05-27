@@ -65,8 +65,15 @@ class ReservationsActivity : AppCompatActivity() {
 
         val today = Calendar.getInstance()
         calendarView.setDate(today.timeInMillis, false, true)
+
+        // Označi današnji datum svijetlo ružičasto (stil mora biti definiran u styles.xml)
+        calendarView.setDateTextAppearance(R.style.TodayDateTextAppearance)
+
+        // Postavi boju odabranog datuma
+        calendarView.setSelectedWeekBackgroundColor(Color.parseColor("#ff9ddb"))
+
+        // Ostale boje kalendara
         calendarView.setFocusedMonthDateColor(Color.parseColor("#89135b"))
-        calendarView.setSelectedWeekBackgroundColor(Color.parseColor("#f3c4ff"))
         calendarView.setUnfocusedMonthDateColor(Color.GRAY)
 
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->

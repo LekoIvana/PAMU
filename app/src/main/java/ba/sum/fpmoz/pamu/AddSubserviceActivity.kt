@@ -29,7 +29,7 @@ class AddSubserviceActivity : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.addSubserviceToolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Dodavanje podusluge"
+        supportActionBar?.title = "Dodavanje cijena"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         toolbar.setNavigationOnClickListener {

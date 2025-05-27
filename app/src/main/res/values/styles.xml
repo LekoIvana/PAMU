@@ -18,6 +18,12 @@
         <item name="android:layout_marginTop">24dp</item>
     </style>
 
+    <!-- Stil za označavanje današnjeg datuma u kalendaru -->
+    <style name="TodayDateTextAppearance" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">#89135b</item>
+        <item name="android:background">#f3c4ff</item> <!-- svijetlo ružičasta pozadina -->
+    </style>
+
 
 
 </resources>

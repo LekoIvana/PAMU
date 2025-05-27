@@ -16,7 +16,7 @@
     <!-- Admin-only stavke -->
     <item
         android:id="@+id/nav_dodaj_subuslugu"
-        android:title="Dodaj poduslugu"
+        android:title="Dodaj cijenu"
         android:icon="@drawable/ic_add" />
 
     <!-- Admin-only stavke -->
