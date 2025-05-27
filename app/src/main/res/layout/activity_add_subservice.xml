@@ -1,10 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddSubserviceActivity">
+    android:fillViewport="true"
+    android:background="#FFFFFF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/addSubserviceToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ff9ddb"
+            android:title="Dodaj poduslugu"
+            android:titleTextColor="#89135b"
+            android:contentInsetStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
+
+        <!-- Header slika -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:src="@drawable/plus_add"
+            android:scaleType="centerCrop"
+            android:contentDescription="Dodavanje nove usluge" />
+
+        <!-- Polja za unos -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Kategorija -->
+            <EditText
+                android:id="@+id/etKategorija"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edittext_background"
+                android:fontFamily="sans-serif"
+                android:hint="Kategorija "
+                android:inputType="textCapWords"
+                android:padding="12dp"
+                android:textColor="#212121"
+                android:textSize="16sp" />
+
+            <!-- Naziv podusluge -->
+            <EditText
+                android:id="@+id/etNaziv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edittext_background"
+                android:fontFamily="sans-serif"
+                android:hint="Naziv podusluge "
+                android:inputType="textCapWords"
+                android:padding="12dp"
+                android:textColor="#212121"
+                android:textSize="16sp" />
+
+            <!-- Cijena -->
+            <EditText
+                android:id="@+id/etCijena"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/edittext_background"
+                android:fontFamily="sans-serif"
+                android:hint="Cijena "
+                android:inputType="number"
+                android:padding="12dp"
+                android:textColor="#212121"
+                android:textSize="16sp" />
+
+            <!-- Gumb za spremanje -->
+            <Button
+                android:id="@+id/btnSpremi"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Spremi poduslugu"
+                android:backgroundTint="#89135b"
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

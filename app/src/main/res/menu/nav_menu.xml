@@ -15,6 +15,12 @@
 
     <!-- Admin-only stavke -->
     <item
+        android:id="@+id/nav_dodaj_subuslugu"
+        android:title="Dodaj poduslugu"
+        android:icon="@drawable/ic_add" />
+
+    <!-- Admin-only stavke -->
+    <item
         android:id="@+id/nav_admin_reservations"
         android:title="Rezervacije"
         android:icon="@drawable/ic_calendar" />

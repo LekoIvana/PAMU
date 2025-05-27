@@ -15,6 +15,9 @@
         android:theme="@style/Theme.Pamu"
         tools:targetApi="31">
         <activity
+            android:name=".AddSubserviceActivity"
+            android:exported="false" />
+        <activity
             android:name=".ContactActivity"
             android:exported="false" />
         <activity

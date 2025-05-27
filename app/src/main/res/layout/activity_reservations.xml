@@ -28,12 +28,14 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Kalendar -->
             <CalendarView
                 android:id="@+id/calendarView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
 
+            <!-- Odabrani datum -->
             <TextView
                 android:id="@+id/selectedDateText"
                 android:layout_width="wrap_content"
@@ -44,7 +46,7 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
-            <!-- ListView za termine -->
+            <!-- Lista termina -->
             <ListView
                 android:id="@+id/timeListView"
                 android:layout_width="match_parent"
@@ -54,15 +56,15 @@
                 android:divider="@android:color/darker_gray"
                 android:dividerHeight="1dp" />
 
-            <EditText
-                android:id="@+id/noteEditText"
+            <!-- Spinner za podusluge -->
+            <Spinner
+                android:id="@+id/subserviceSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Unesite napomenu"
-                android:paddingTop="12dp"
-                android:textColor="#89135b"
+                android:layout_marginTop="12dp"
                 android:visibility="gone" />
 
+            <!-- Gumb za potvrdu -->
             <Button
                 android:id="@+id/submitReservationButton"
                 android:layout_width="match_parent"

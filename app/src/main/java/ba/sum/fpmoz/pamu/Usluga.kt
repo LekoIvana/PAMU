@@ -1,4 +1,6 @@
-package ba.sum.fpmoz.pamu
+package ba.sum.fpmoz.pamu.model
 
-class Usluga {
-}
+data class Usluga(
+    val naziv: String = "",
+    val cijena: Int = 0
+)

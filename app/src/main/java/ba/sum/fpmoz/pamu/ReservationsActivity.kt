@@ -1,7 +1,11 @@
 package ba.sum.fpmoz.pamu
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -10,7 +14,6 @@ import androidx.appcompat.widget.Toolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ReservationsActivity : AppCompatActivity() {
@@ -18,7 +21,7 @@ class ReservationsActivity : AppCompatActivity() {
     private lateinit var calendarView: CalendarView
     private lateinit var selectedDateText: TextView
     private lateinit var timeListView: ListView
-    private lateinit var noteEditText: EditText
+    private lateinit var subserviceSpinner: Spinner
     private lateinit var submitReservationButton: Button
 
     private val db = Firebase.firestore
@@ -28,6 +31,12 @@ class ReservationsActivity : AppCompatActivity() {
     private var selectedCategory = ""
     private var selectedDate = ""
     private var selectedTime: String? = null
+    private var selectedSubservice: String? = null
+    private var timeAdapter: TimeAdapter? = null
+
+    data class Subservice(val name: String, val price: Long) {
+        override fun toString(): String = name
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,12 +46,12 @@ class ReservationsActivity : AppCompatActivity() {
         calendarView = findViewById(R.id.calendarView)
         selectedDateText = findViewById(R.id.selectedDateText)
         timeListView = findViewById(R.id.timeListView)
-        noteEditText = findViewById(R.id.noteEditText)
+        subserviceSpinner = findViewById(R.id.subserviceSpinner)
         submitReservationButton = findViewById(R.id.submitReservationButton)
 
-        noteEditText.visibility = View.GONE
         submitReservationButton.visibility = View.GONE
         timeListView.visibility = View.GONE
+        subserviceSpinner.visibility = View.GONE
 
         selectedCategory = intent.getStringExtra("selectedCategory") ?: "Nepoznata"
 
@@ -54,21 +63,27 @@ class ReservationsActivity : AppCompatActivity() {
             finish()
         }
 
+        val today = Calendar.getInstance()
+        calendarView.setDate(today.timeInMillis, false, true)
+        calendarView.setFocusedMonthDateColor(Color.parseColor("#89135b"))
+        calendarView.setSelectedWeekBackgroundColor(Color.parseColor("#f3c4ff"))
+        calendarView.setUnfocusedMonthDateColor(Color.GRAY)
+
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val selectedCalendar = Calendar.getInstance()
             selectedCalendar.set(year, month, dayOfMonth)
 
-            val today = Calendar.getInstance()
-            today.set(Calendar.HOUR_OF_DAY, 0)
-            today.set(Calendar.MINUTE, 0)
-            today.set(Calendar.SECOND, 0)
-            today.set(Calendar.MILLISECOND, 0)
+            val now = Calendar.getInstance()
+            now.set(Calendar.HOUR_OF_DAY, 0)
+            now.set(Calendar.MINUTE, 0)
+            now.set(Calendar.SECOND, 0)
+            now.set(Calendar.MILLISECOND, 0)
 
-            if (selectedCalendar.before(today)) {
+            if (selectedCalendar.before(now)) {
                 Toast.makeText(this, "Ne možete rezervirati termin za prošli datum.", Toast.LENGTH_SHORT).show()
                 selectedDateText.visibility = View.GONE
                 timeListView.visibility = View.GONE
-                noteEditText.visibility = View.GONE
+                subserviceSpinner.visibility = View.GONE
                 submitReservationButton.visibility = View.GONE
                 return@setOnDateChangeListener
             }
@@ -76,24 +91,48 @@ class ReservationsActivity : AppCompatActivity() {
             selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
             selectedDateText.text = "Odabrani datum: $selectedDate"
             selectedDateText.visibility = View.VISIBLE
+
+            // Resetiraj odabire kad se mijenja datum
+            selectedTime = null
+            selectedSubservice = null
+            timeAdapter?.selectedPosition = -1
+            timeAdapter?.notifyDataSetChanged()
+            subserviceSpinner.visibility = View.GONE
+            submitReservationButton.visibility = View.GONE
+
             loadAvailableTimes()
         }
 
         timeListView.setOnItemClickListener { _, _, position, _ ->
-            selectedTime = timeListView.adapter.getItem(position).toString()
-            noteEditText.visibility = View.VISIBLE
+            selectedTime = timeAdapter?.getItem(position)
+            timeAdapter?.selectedPosition = position
+            timeAdapter?.notifyDataSetChanged()
+
+            selectedSubservice = null
+            loadSubservices()
+            subserviceSpinner.visibility = View.VISIBLE
             submitReservationButton.visibility = View.VISIBLE
         }
 
+        subserviceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val subservice = parent.getItemAtPosition(position) as Subservice
+                selectedSubservice = subservice.name
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                selectedSubservice = null
+            }
+        }
+
         submitReservationButton.setOnClickListener {
-            val note = noteEditText.text.toString().trim()
-            if (note.isEmpty()) {
-                Toast.makeText(this, "Unesite napomenu", Toast.LENGTH_SHORT).show()
+            if (selectedTime.isNullOrEmpty()) {
+                Toast.makeText(this, "Odaberite termin iz liste", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (selectedTime.isNullOrEmpty()) {
-                Toast.makeText(this, "Odaberite termin iz liste", Toast.LENGTH_SHORT).show()
+            if (selectedSubservice.isNullOrEmpty()) {
+                Toast.makeText(this, "Odaberite uslugu", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -102,7 +141,7 @@ class ReservationsActivity : AppCompatActivity() {
             val cancelBtn = dialogView.findViewById<Button>(R.id.cancelButton)
             val confirmBtn = dialogView.findViewById<Button>(R.id.confirmButton)
 
-            dialogMessage.text = "Želite li rezervirati $selectedTime za $selectedDate?"
+            dialogMessage.text = "Želite li rezervirati $selectedTime za $selectedDate?\nUsluga: $selectedSubservice"
 
             val dialog = AlertDialog.Builder(this)
                 .setView(dialogView)
@@ -114,7 +153,7 @@ class ReservationsActivity : AppCompatActivity() {
             }
 
             confirmBtn.setOnClickListener {
-                reserveAppointment(selectedTime!!, note)
+                reserveAppointment(selectedTime!!, selectedSubservice!!)
                 dialog.dismiss()
             }
 
@@ -137,8 +176,8 @@ class ReservationsActivity : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
-                val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, availableTimes)
-                timeListView.adapter = adapter
+                timeAdapter = TimeAdapter(this, availableTimes)
+                timeListView.adapter = timeAdapter
                 timeListView.visibility = View.VISIBLE
             }
             .addOnFailureListener {
@@ -146,7 +185,44 @@ class ReservationsActivity : AppCompatActivity() {
             }
     }
 
-    private fun reserveAppointment(time: String, note: String) {
+    private fun loadSubservices() {
+        db.collection("services")
+            .document(selectedCategory)
+            .collection("usluge")
+            .get()
+            .addOnSuccessListener { result ->
+                val subservices = result.mapNotNull {
+                    val name = it.getString("naziv") ?: return@mapNotNull null
+                    val price = it.getLong("cijena") ?: return@mapNotNull null
+                    Subservice(name, price)
+                }
+                if (subservices.isNotEmpty()) {
+                    val adapter = object : ArrayAdapter<Subservice>(this, android.R.layout.simple_spinner_item, subservices) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getView(position, convertView, parent)
+                            (view as TextView).text = "${subservices[position].name} - ${subservices[position].price} KM"
+                            return view
+                        }
+
+                        override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getDropDownView(position, convertView, parent)
+                            (view as TextView).text = "${subservices[position].name} - ${subservices[position].price} KM"
+                            return view
+                        }
+                    }
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    subserviceSpinner.adapter = adapter
+                    subserviceSpinner.visibility = View.VISIBLE
+                } else {
+                    subserviceSpinner.visibility = View.GONE
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Greška pri dohvaćanju usluga", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun reserveAppointment(time: String, subservice: String) {
         val email = auth.currentUser?.email ?: return
 
         db.collection("appointments")
@@ -161,7 +237,7 @@ class ReservationsActivity : AppCompatActivity() {
                         "date" to selectedDate,
                         "time" to time,
                         "userEmail" to email,
-                        "note" to note,
+                        "note" to subservice,
                         "status" to "pending"
                     )
                     db.collection("appointments")
@@ -169,8 +245,7 @@ class ReservationsActivity : AppCompatActivity() {
                         .addOnSuccessListener {
                             Toast.makeText(this, "Rezervacija je poslana. Čeka se odobrenje.", Toast.LENGTH_SHORT).show()
                             timeListView.visibility = View.GONE
-                            noteEditText.text.clear()
-                            noteEditText.visibility = View.GONE
+                            subserviceSpinner.visibility = View.GONE
                             submitReservationButton.visibility = View.GONE
                         }
                         .addOnFailureListener {
@@ -180,5 +255,28 @@ class ReservationsActivity : AppCompatActivity() {
                     Toast.makeText(this, "Taj termin je već zauzet", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+}
+
+class TimeAdapter(
+    context: Context,
+    private val times: List<String>
+) : ArrayAdapter<String>(context, 0, times) {
+
+    var selectedPosition: Int = -1
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.list_item_time, parent, false)
+        val timeTextView = view.findViewById<TextView>(R.id.timeTextView)
+
+        timeTextView.text = times[position]
+
+        if (position == selectedPosition) {
+            timeTextView.setBackgroundColor(Color.parseColor("#f3c4ff"))
+        } else {
+            timeTextView.setBackgroundColor(Color.TRANSPARENT)
+        }
+
+        return view
     }
 }

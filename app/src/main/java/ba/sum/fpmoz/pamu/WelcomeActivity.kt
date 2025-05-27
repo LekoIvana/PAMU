@@ -54,9 +54,11 @@ class WelcomeActivity : AppCompatActivity() {
                         menu.findItem(R.id.nav_appointments)?.isVisible = false
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = true
                         menu.findItem(R.id.nav_admin_panel)?.isVisible = true
+                        menu.findItem(R.id.nav_dodaj_subuslugu).isVisible = true
                     } else {
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = false
                         menu.findItem(R.id.nav_admin_panel)?.isVisible = false
+                        menu.findItem(R.id.nav_dodaj_subuslugu).isVisible = false
                     }
                 }
                 .addOnFailureListener {
@@ -107,6 +109,10 @@ class WelcomeActivity : AppCompatActivity() {
                 }
                 R.id.nav_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                R.id.nav_dodaj_subuslugu -> {
+                    startActivity(Intent(this, AddSubserviceActivity::class.java))
                     true
                 }
                 R.id.nav_admin_reservations -> {
