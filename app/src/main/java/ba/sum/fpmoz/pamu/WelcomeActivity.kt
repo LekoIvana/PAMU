@@ -20,12 +20,14 @@ class WelcomeActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var navigationView: NavigationView
     private lateinit var auth: FirebaseAuth
+    private var isAdmin: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
         auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -34,32 +36,36 @@ class WelcomeActivity : AppCompatActivity() {
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
 
+        recyclerView = findViewById(R.id.serviceRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
         navigationView.menu.clear()
         navigationView.inflateMenu(R.menu.nav_menu)
 
-        val db = FirebaseFirestore.getInstance()
         val currentUserUid = auth.currentUser?.uid
-
         if (currentUserUid != null) {
             db.collection("users").document(currentUserUid).get()
                 .addOnSuccessListener { document ->
                     val role = document.getString("role")
-                    val menu = navigationView.menu
+                    isAdmin = role == "admin"
 
-                    // Uvijek sakrij "Dodaj uslugu" i "Upravljanje korisnicima"
+                    val menu = navigationView.menu
                     menu.findItem(R.id.nav_add_service)?.isVisible = false
                     menu.findItem(R.id.nav_manage_users)?.isVisible = false
 
-                    if (role == "admin") {
+                    if (isAdmin) {
                         menu.findItem(R.id.nav_appointments)?.isVisible = false
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = true
                         menu.findItem(R.id.nav_admin_panel)?.isVisible = true
-                        menu.findItem(R.id.nav_dodaj_subuslugu).isVisible = true
+                        menu.findItem(R.id.nav_dodaj_subuslugu)?.isVisible = true
                     } else {
                         menu.findItem(R.id.nav_admin_reservations)?.isVisible = false
                         menu.findItem(R.id.nav_admin_panel)?.isVisible = false
-                        menu.findItem(R.id.nav_dodaj_subuslugu).isVisible = false
+                        menu.findItem(R.id.nav_dodaj_subuslugu)?.isVisible = false
                     }
+
+                    // 👉 nakon što znamo ulogu, tek tada učitavamo usluge
+                    loadServices(db)
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Greška pri dohvaćanju uloge", Toast.LENGTH_SHORT).show()
@@ -77,26 +83,19 @@ class WelcomeActivity : AppCompatActivity() {
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
 
-        val user = auth.currentUser
-        val uid = user?.uid
-
-        if (uid != null) {
-            val userDocRef = db.collection("users").document(uid)
-            userDocRef.get().addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
+        auth.currentUser?.let { user ->
+            db.collection("users").document(user.uid)
+                .get()
+                .addOnSuccessListener { document ->
                     val name = document.getString("userName")
                     val email = document.getString("email") ?: user.email
-
                     navUserName.text = name ?: "Korisnik"
                     navUserEmail.text = email ?: "email@primjer.com"
-                } else {
-                    navUserName.text = "Nepoznato"
-                    navUserEmail.text = user?.email ?: "email@primjer.com"
                 }
-            }.addOnFailureListener {
-                navUserName.text = "Greška"
-                navUserEmail.text = user?.email ?: "email@primjer.com"
-            }
+                .addOnFailureListener {
+                    navUserName.text = "Greška"
+                    navUserEmail.text = user.email ?: "email@primjer.com"
+                }
         }
 
         navigationView.setNavigationItemSelectedListener {
@@ -138,25 +137,48 @@ class WelcomeActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
 
-        recyclerView = findViewById(R.id.serviceRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
+    private fun loadServices(db: FirebaseFirestore) {
         db.collection("services").get()
             .addOnSuccessListener { result ->
                 val services = mutableListOf<Service>()
                 for (document in result) {
+                    val id = document.id
                     val name = document.getString("name") ?: "N/A"
                     val description = document.getString("description") ?: ""
                     val imageRes = R.drawable.balayage
-                    services.add(Service(name, description, imageRes))
+
+                    services.add(Service(id = id, name = name, description = description, imageResId = imageRes))
                 }
 
-                recyclerView.adapter = ServiceAdapter(services) { service ->
-                    val intent = Intent(this, ReservationsActivity::class.java)
-                    intent.putExtra("selectedCategory", service.name)
-                    startActivity(intent)
-                }
+                recyclerView.adapter = ServiceAdapter(
+                    services = services,
+                    onEditClick = { service ->
+                        if (isAdmin) {
+                            val intent = Intent(this, EditServiceActivity::class.java)
+                            intent.putExtra("SERVICE_ID", service.id)
+                            intent.putExtra("SERVICE_NAME", service.name)
+                            intent.putExtra("SERVICE_DESC", service.description)
+                            intent.putExtra("SERVICE_IMAGE", service.imageResId)
+                            startActivity(intent)
+                        }
+                    },
+                    onDeleteClick = { service ->
+                        if (isAdmin) {
+                            db.collection("services").document(service.id)
+                                .delete()
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Usluga obrisana", Toast.LENGTH_SHORT).show()
+                                    loadServices(db)
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Greška pri brisanju", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                    },
+                    isAdmin = isAdmin // ✅ ovo sada ima točnu vrijednost
+                )
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Greška pri učitavanju usluga", Toast.LENGTH_SHORT).show()

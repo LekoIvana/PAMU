@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +19,16 @@ class ServicesFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var serviceAdapter: ServiceAdapter
     private val serviceList = mutableListOf<Service>()
-
     private val db = FirebaseFirestore.getInstance()
+
+    // ✅ ActivityResultLauncher za osvježavanje nakon uređivanja
+    private val editServiceLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            fetchServices()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,16 +38,36 @@ class ServicesFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.servicesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        serviceAdapter = ServiceAdapter(serviceList) { service ->
-            // Klik na uslugu (nije obavezno)
-            Toast.makeText(requireContext(), "Klik: ${service.name}", Toast.LENGTH_SHORT).show()
-        }
+
+        serviceAdapter = ServiceAdapter(
+            services = serviceList,
+            onEditClick = { service ->
+                val intent = Intent(requireContext(), EditServiceActivity::class.java)
+                intent.putExtra("SERVICE_ID", service.id)
+                intent.putExtra("SERVICE_NAME", service.name)
+                intent.putExtra("SERVICE_DESC", service.description)
+                intent.putExtra("SERVICE_IMAGE", service.imageResId)
+                editServiceLauncher.launch(intent)
+            },
+            onDeleteClick = { service ->
+                db.collection("services").document(service.id)
+                    .delete()
+                    .addOnSuccessListener {
+                        serviceList.remove(service)
+                        serviceAdapter.notifyDataSetChanged()
+                        Toast.makeText(requireContext(), "Usluga obrisana", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Greška pri brisanju usluge", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        )
+
         recyclerView.adapter = serviceAdapter
 
         val fab = view.findViewById<FloatingActionButton>(R.id.addServiceFab)
         fab.setOnClickListener {
-            val intent = Intent(requireContext(), AddServiceActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), AddServiceActivity::class.java))
         }
 
         fetchServices()
@@ -50,10 +80,11 @@ class ServicesFragment : Fragment() {
             .addOnSuccessListener { result ->
                 serviceList.clear()
                 for (document in result) {
+                    val id = document.id
                     val name = document.getString("name") ?: "N/A"
                     val description = document.getString("description") ?: ""
-                    val imageRes = R.drawable.balayage // možeš ovo kasnije zamijeniti pravom slikom
-                    serviceList.add(Service(name, description, imageRes))
+                    val imageRes = R.drawable.balayage
+                    serviceList.add(Service(id = id, name = name, description = description, imageResId = imageRes))
                 }
                 serviceAdapter.notifyDataSetChanged()
             }

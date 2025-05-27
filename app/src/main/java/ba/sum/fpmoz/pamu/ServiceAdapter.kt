@@ -1,5 +1,6 @@
 package ba.sum.fpmoz.pamu
 
+import ba.sum.fpmoz.pamu.Service
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,16 +8,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class Service(
-    val name: String,
-    val description: String,
-    val imageResId: Int
-)
+
 
 class ServiceAdapter(
     private val services: List<Service>,
-    private val onClick: (Service) -> Unit
+    private val onEditClick: (Service) -> Unit,
+    private val onDeleteClick: (Service) -> Unit,
+    private val isAdmin: Boolean = true
 ) : RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder>() {
+
 
     class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameText: TextView = itemView.findViewById(R.id.serviceNameTextView)
@@ -36,9 +36,21 @@ class ServiceAdapter(
         holder.imageView.setImageResource(service.imageResId)
 
         holder.itemView.setOnClickListener {
-            onClick(service)
+            if (isAdmin) {
+                val context = holder.itemView.context
+                androidx.appcompat.app.AlertDialog.Builder(context)
+                    .setTitle("Opcije za '${service.name}'")
+                    .setItems(arrayOf("Uredi", "Obriši")) { _, which ->
+                        when (which) {
+                            0 -> onEditClick(service)
+                            1 -> onDeleteClick(service)
+                        }
+                    }
+                    .show()
+            }
         }
     }
+
 
     override fun getItemCount() = services.size
 }

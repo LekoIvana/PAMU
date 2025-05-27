@@ -14,55 +14,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pamu"
         tools:targetApi="31">
-        <activity
-            android:name=".AddSubserviceActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ContactActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LocationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserReservationsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminPagerReservationsAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".ReservationsAdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ReservationsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HomeActivity"
-            android:exported="true">
+
+        <activity android:name=".AddSubserviceActivity" android:exported="false" />
+        <activity android:name=".ContactActivity" android:exported="false" />
+        <activity android:name=".LocationActivity" android:exported="false" />
+        <activity android:name=".UserReservationsActivity" android:exported="false" />
+        <activity android:name=".ReservationsAdminActivity" android:exported="false" />
+        <activity android:name=".ReservationsActivity" android:exported="false" />
+        <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".WelcomeActivity" android:exported="false" />
+        <activity android:name=".LoginActivity" android:exported="false" />
+        <activity android:name=".RegisterActivity" android:exported="false" />
+        <activity android:name=".AddServiceActivity" android:exported="false" />
+        <activity android:name=".EditServiceActivity" android:exported="false" />
+        <activity android:name=".AdminPanelActivity" />
+
+        <activity android:name=".HomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".WelcomeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AddServiceActivity"
-            android:exported="false" />
-        <activity android:name=".AdminPanelActivity" />
+
     </application>
 
 </manifest>

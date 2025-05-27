@@ -1,0 +1,8 @@
+package ba.sum.fpmoz.pamu
+
+data class Service(
+    val id: String = "",
+    val name: String = "",
+    val description: String = "",
+    val imageResId: Int = 0
+)
