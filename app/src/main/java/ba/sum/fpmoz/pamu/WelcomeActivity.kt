@@ -35,7 +35,6 @@ class WelcomeActivity : AppCompatActivity() {
 
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
-
         recyclerView = findViewById(R.id.serviceRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -64,8 +63,7 @@ class WelcomeActivity : AppCompatActivity() {
                         menu.findItem(R.id.nav_dodaj_subuslugu)?.isVisible = false
                     }
 
-                    // 👉 nakon što znamo ulogu, tek tada učitavamo usluge
-                    loadServices(db)
+                    loadServices(db) // učitavanje usluga tek nakon određivanja uloge
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Greška pri dohvaćanju uloge", Toast.LENGTH_SHORT).show()
@@ -177,7 +175,12 @@ class WelcomeActivity : AppCompatActivity() {
                                 }
                         }
                     },
-                    isAdmin = isAdmin // ✅ ovo sada ima točnu vrijednost
+                    isAdmin = isAdmin,
+                    onItemClick = { service ->
+                        val intent = Intent(this, ReservationsActivity::class.java)
+                        intent.putExtra("selectedCategory", service.name)
+                        startActivity(intent)
+                    }
                 )
             }
             .addOnFailureListener {
