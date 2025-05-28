@@ -68,16 +68,17 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_arrived"
+                android:src="@drawable/ic_check1"
                 android:contentDescription="Prihvati"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:tint="#000000" />
 
             <ImageButton
                 android:id="@+id/rejectButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_rejected"
+                android:src="@drawable/ic_delite2"
                 android:contentDescription="Odbij" />
         </LinearLayout>
     </LinearLayout>

@@ -13,9 +13,9 @@
         android:id="@+id/adminToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#ff9ddb"
+        android:background="#89135b"
         android:title="Rezervacije"
-        android:titleTextColor="#89135b"
+        android:titleTextColor="#ff9ddb"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
     <!-- TabLayout -->
@@ -23,9 +23,9 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff9ddb"
-        app:tabTextColor="#89135b"
-        app:tabSelectedTextColor="#89135b"
+        android:background="#89135b"
+        app:tabTextColor="#ff9ddb"
+        app:tabSelectedTextColor="#ff9ddb"
         app:tabIndicatorColor="#89135b"
         app:tabIndicatorHeight="4dp" />
 

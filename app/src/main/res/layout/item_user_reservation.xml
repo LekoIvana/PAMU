@@ -55,7 +55,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_rejected"
+            android:src="@drawable/ic_delite2"
             android:contentDescription="Otkaži termin" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

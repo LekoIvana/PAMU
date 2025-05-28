@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ApprovedReservationsFragment : Fragment() {
 
@@ -27,7 +29,7 @@ class ApprovedReservationsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.approvedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ApprovedReservationAdapter(reservations) // koristi adapter bez dugmadi
+        adapter = ApprovedReservationAdapter(reservations)
         recyclerView.adapter = adapter
 
         loadApprovedReservations()
@@ -36,15 +38,40 @@ class ApprovedReservationsFragment : Fragment() {
     }
 
     private fun loadApprovedReservations() {
+        val currentDateTime = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+
         db.collection("appointments")
             .whereEqualTo("status", "approved")
             .get()
             .addOnSuccessListener { snapshot ->
                 reservations.clear()
-                val list = snapshot.documents
-                    .sortedWith(compareBy({ it.getString("date") }, { it.getString("time") }))
 
-                for (doc in list) {
+                val filteredList = snapshot.documents.filter { doc ->
+                    val date = doc.getString("date")
+                    val time = doc.getString("time")
+
+                    if (date != null && time != null) {
+                        try {
+                            val fullDateTime = formatter.parse("$date $time")
+                            if (fullDateTime != null) {
+                                val cal = Calendar.getInstance()
+                                cal.time = fullDateTime
+                                cal.add(Calendar.HOUR_OF_DAY, 1)
+                                val endTime = cal.time
+                                endTime.after(currentDateTime)
+                            } else {
+                                false
+                            }
+                        } catch (e: Exception) {
+                            false
+                        }
+                    } else {
+                        false
+                    }
+                }.sortedWith(compareBy({ it.getString("date") }, { it.getString("time") }))
+
+                for (doc in filteredList) {
                     val id = doc.id
                     val date = doc.getString("date") ?: ""
                     val time = doc.getString("time") ?: ""

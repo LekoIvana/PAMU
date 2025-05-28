@@ -1,19 +1,15 @@
 package ba.sum.fpmoz.pamu
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import ba.sum.fpmoz.pamu.R
+import androidx.appcompat.widget.Toolbar
 import ba.sum.fpmoz.pamu.model.Usluga
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.appcompat.widget.Toolbar
-
 
 class AddSubserviceActivity : AppCompatActivity() {
 
-    private lateinit var etKategorija: EditText
+    private lateinit var autoKategorija: AutoCompleteTextView
     private lateinit var etNaziv: EditText
     private lateinit var etCijena: EditText
     private lateinit var btnSpremi: Button
@@ -22,7 +18,7 @@ class AddSubserviceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_subservice)
 
-        etKategorija = findViewById(R.id.etKategorija)
+        autoKategorija = findViewById(R.id.autoKategorija)
         etNaziv = findViewById(R.id.etNaziv)
         etCijena = findViewById(R.id.etCijena)
         btnSpremi = findViewById(R.id.btnSpremi)
@@ -32,12 +28,32 @@ class AddSubserviceActivity : AppCompatActivity() {
         supportActionBar?.title = "Dodavanje cijena"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        toolbar.setNavigationOnClickListener {
-            finish() // ili startActivity(Intent(...)) ako želiš vratiti na određeni ekran
-        }
+        toolbar.setNavigationOnClickListener { finish() }
+
+        // Učitaj kategorije iz Firestore i koristi polje "name"
+        val db = FirebaseFirestore.getInstance()
+        db.collection("services")
+            .get()
+            .addOnSuccessListener { result ->
+                val kategorije = result.documents.mapNotNull { it.getString("name") }
+
+                if (kategorije.isEmpty()) {
+                    Toast.makeText(this, "Nema pronađenih kategorija", Toast.LENGTH_SHORT).show()
+                }
+
+                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, kategorije)
+                autoKategorija.setAdapter(adapter)
+
+                autoKategorija.setOnClickListener {
+                    autoKategorija.showDropDown()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Greška pri dohvaćanju kategorija", Toast.LENGTH_SHORT).show()
+            }
 
         btnSpremi.setOnClickListener {
-            val kategorija = etKategorija.text.toString().trim().lowercase()
+            val kategorija = autoKategorija.text.toString().trim().lowercase()
             val naziv = etNaziv.text.toString().trim()
             val cijena = etCijena.text.toString().toIntOrNull()
 
@@ -67,3 +83,4 @@ class AddSubserviceActivity : AppCompatActivity() {
             }
     }
 }
+
