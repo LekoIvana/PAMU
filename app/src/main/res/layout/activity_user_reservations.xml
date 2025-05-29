@@ -5,15 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar s naslovom i strelicom -->
+    <!-- Toolbar sa strelicom nazad i bijelim naslovom -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/userReservationsToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="#89135b"
         android:title="Moje rezervacije"
-        android:titleTextColor="#ff9ddb"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+        android:titleTextColor="@android:color/white"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="@android:color/white" />
 
     <!-- Fragment container -->
     <FrameLayout

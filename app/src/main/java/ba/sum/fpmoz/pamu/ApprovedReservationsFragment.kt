@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,7 @@ class ApprovedReservationsFragment : Fragment() {
     private val db = Firebase.firestore
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ApprovedReservationAdapter
+    private lateinit var emptyMessage: TextView
     private val reservations = mutableListOf<Reservation>()
 
     override fun onCreateView(
@@ -27,13 +29,13 @@ class ApprovedReservationsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_approved_reservations, container, false)
 
         recyclerView = view.findViewById(R.id.approvedRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        emptyMessage = view.findViewById(R.id.emptyMessage)
 
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = ApprovedReservationAdapter(reservations)
         recyclerView.adapter = adapter
 
         loadApprovedReservations()
-
         return view
     }
 
@@ -47,7 +49,13 @@ class ApprovedReservationsFragment : Fragment() {
             .addOnSuccessListener { snapshot ->
                 reservations.clear()
 
-                val filteredList = snapshot.documents.filter { doc ->
+                val filteredList = snapshot.documents.sortedWith(compareBy(
+                    { it.getString("date") },
+                    { it.getString("time") }
+                ))
+
+                for (doc in filteredList) {
+                    val id = doc.id
                     val date = doc.getString("date")
                     val time = doc.getString("time")
 
@@ -59,29 +67,26 @@ class ApprovedReservationsFragment : Fragment() {
                                 cal.time = fullDateTime
                                 cal.add(Calendar.HOUR_OF_DAY, 1)
                                 val endTime = cal.time
-                                endTime.after(currentDateTime)
-                            } else {
-                                false
+
+                                if (endTime.after(currentDateTime)) {
+                                    val user = doc.getString("userEmail") ?: ""
+                                    val note = doc.getString("note") ?: ""
+                                    val category = doc.getString("category") ?: ""
+                                    reservations.add(
+                                        Reservation(id, date, time, user, note, category)
+                                    )
+                                } else {
+                                    db.collection("appointments").document(id).delete()
+                                }
                             }
                         } catch (e: Exception) {
-                            false
+                            // skip if date/time parse fails
                         }
-                    } else {
-                        false
                     }
-                }.sortedWith(compareBy({ it.getString("date") }, { it.getString("time") }))
-
-                for (doc in filteredList) {
-                    val id = doc.id
-                    val date = doc.getString("date") ?: ""
-                    val time = doc.getString("time") ?: ""
-                    val user = doc.getString("userEmail") ?: ""
-                    val note = doc.getString("note") ?: ""
-                    val category = doc.getString("category") ?: ""
-                    reservations.add(Reservation(id, date, time, user, note, category))
                 }
 
                 adapter.notifyDataSetChanged()
+                emptyMessage.visibility = if (reservations.isEmpty()) View.VISIBLE else View.GONE
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Greška pri dohvaćanju rezervacija", Toast.LENGTH_SHORT).show()

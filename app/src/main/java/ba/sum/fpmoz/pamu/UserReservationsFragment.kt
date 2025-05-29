@@ -19,6 +19,7 @@ class UserReservationsFragment : Fragment() {
     private val db = Firebase.firestore
     private val auth = FirebaseAuth.getInstance()
     private lateinit var recyclerView: RecyclerView
+    private lateinit var emptyMessageText: TextView
     private lateinit var adapter: UserReservationAdapter
     private val reservations = mutableListOf<Reservation>()
 
@@ -29,6 +30,8 @@ class UserReservationsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_user_reservations, container, false)
 
         recyclerView = view.findViewById(R.id.userReservationsRecyclerView)
+        emptyMessageText = view.findViewById(R.id.emptyMessageText)
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = UserReservationAdapter(reservations) { reservationId ->
@@ -104,6 +107,7 @@ class UserReservationsFragment : Fragment() {
                     }
                 }
                 adapter.notifyDataSetChanged()
+                emptyMessageText.visibility = if (reservations.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 }

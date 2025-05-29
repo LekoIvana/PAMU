@@ -18,19 +18,20 @@ class AddSubserviceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_subservice)
 
+        // Inicijalizacija UI elemenata
         autoKategorija = findViewById(R.id.autoKategorija)
         etNaziv = findViewById(R.id.etNaziv)
         etCijena = findViewById(R.id.etCijena)
         btnSpremi = findViewById(R.id.btnSpremi)
 
+        // Toolbar s bijelim naslovom i strelicom
         val toolbar = findViewById<Toolbar>(R.id.addSubserviceToolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Dodavanje cijena"
+        supportActionBar?.title = "Dodaj poduslugu"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         toolbar.setNavigationOnClickListener { finish() }
 
-        // Učitaj kategorije iz Firestore i koristi polje "name"
+        // Učitaj kategorije iz Firestore (polje "name")
         val db = FirebaseFirestore.getInstance()
         db.collection("services")
             .get()
@@ -48,10 +49,11 @@ class AddSubserviceActivity : AppCompatActivity() {
                     autoKategorija.showDropDown()
                 }
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener {
                 Toast.makeText(this, "Greška pri dohvaćanju kategorija", Toast.LENGTH_SHORT).show()
             }
 
+        // Spremi novu poduslugu
         btnSpremi.setOnClickListener {
             val kategorija = autoKategorija.text.toString().trim().lowercase()
             val naziv = etNaziv.text.toString().trim()

@@ -57,22 +57,18 @@ class ReservationsActivity : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.reservationsToolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = " $selectedCategory"
+        supportActionBar?.title = "$selectedCategory"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.setNavigationOnClickListener {
-            finish()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         val today = Calendar.getInstance()
         calendarView.setDate(today.timeInMillis, false, true)
 
-        // Označi današnji datum svijetlo ružičasto (stil mora biti definiran u styles.xml)
         calendarView.setDateTextAppearance(R.style.TodayDateTextAppearance)
-
-        // Postavi boju odabranog datuma
         calendarView.setSelectedWeekBackgroundColor(Color.parseColor("#ff9ddb"))
-
-        // Ostale boje kalendara
         calendarView.setFocusedMonthDateColor(Color.parseColor("#89135b"))
         calendarView.setUnfocusedMonthDateColor(Color.GRAY)
 
@@ -99,7 +95,6 @@ class ReservationsActivity : AppCompatActivity() {
             selectedDateText.text = "Odabrani datum: $selectedDate"
             selectedDateText.visibility = View.VISIBLE
 
-            // Resetiraj odabire kad se mijenja datum
             selectedTime = null
             selectedSubservice = null
             timeAdapter?.selectedPosition = -1

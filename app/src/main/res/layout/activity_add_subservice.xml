@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -10,17 +11,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Toolbar -->
+        <!-- Toolbar s bijelom strelicom i bijelim naslovom -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/addSubserviceToolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?attr/actionBarSize"
             android:background="#ff9ddb"
             android:title="Dodaj poduslugu"
-            android:titleTextColor="#89135b"
-            android:contentInsetStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp" />
+            android:titleTextColor="@android:color/white"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:navigationIcon="@drawable/ic_back"
+            app:navigationIconTint="@android:color/white" />
 
         <!-- Header slika -->
         <ImageView
@@ -95,3 +96,4 @@
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
+
