@@ -79,7 +79,7 @@ class RegisterActivity : AppCompatActivity() {
                     emailStatusIcon.setImageResource(R.drawable.ic_check)
                     emailStatusIcon.visibility = View.VISIBLE
                 } else {
-                    emailStatusIcon.setImageResource(R.drawable.ic_user)
+                    emailStatusIcon.setImageResource(R.drawable.ic_cross)
                     emailStatusIcon.visibility = if (email.isNotEmpty()) View.VISIBLE else View.GONE
                 }
             }

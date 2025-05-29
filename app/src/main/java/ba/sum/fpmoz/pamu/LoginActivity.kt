@@ -55,12 +55,12 @@ class LoginActivity : AppCompatActivity() {
             val password = loginPasswordEditText.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Molimo popunite sva polja!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Neispravan email format!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -68,14 +68,14 @@ class LoginActivity : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this, WelcomeActivity::class.java)
                         startActivity(intent)
                         finish()
                     } else {
                         Toast.makeText(
                             this,
-                            "Login failed: ${task.exception?.message}",
+                            "Prijava neuspješna: ${task.exception?.message}",
                             Toast.LENGTH_LONG
                         ).show()
                     }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.appcompat.app.AlertDialog
 
 class WelcomeActivity : AppCompatActivity() {
 
@@ -63,7 +65,7 @@ class WelcomeActivity : AppCompatActivity() {
                         menu.findItem(R.id.nav_dodaj_subuslugu)?.isVisible = false
                     }
 
-                    loadServices(db) // učitavanje usluga tek nakon određivanja uloge
+                    loadServices(db)
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Greška pri dohvaćanju uloge", Toast.LENGTH_SHORT).show()
@@ -99,9 +101,7 @@ class WelcomeActivity : AppCompatActivity() {
         navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_logout -> {
-                    auth.signOut()
-                    startActivity(Intent(this, LoginActivity::class.java))
-                    finish()
+                    showLogoutDialog()
                     true
                 }
                 R.id.nav_settings -> {
@@ -186,6 +186,33 @@ class WelcomeActivity : AppCompatActivity() {
             .addOnFailureListener {
                 Toast.makeText(this, "Greška pri učitavanju usluga", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun showLogoutDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_logout_confirmation, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
+        val confirmButton = dialogView.findViewById<Button>(R.id.confirmLogoutButton)
+
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        confirmButton.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            dialog.dismiss()
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
 
     override fun onBackPressed() {

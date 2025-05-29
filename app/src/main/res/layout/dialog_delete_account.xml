@@ -3,19 +3,56 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@android:color/white">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Jeste li sigurni da želite obrisati svoj račun?"
+        android:text="Unesite lozinku da potvrdite brisanje računa:"
         android:textColor="#212121"
         android:textSize="16sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="16dp" />
 
+    <!-- Lozinka kao u loginu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="@drawable/edittext_background"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_password" />
+
+        <EditText
+            android:id="@+id/confirmPasswordEditText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:hint="Lozinka"
+            android:inputType="textPassword"
+            android:background="@null"
+            android:paddingStart="8dp"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif" />
+
+        <ImageButton
+            android:id="@+id/passwordToggleDialog"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_visibility_off"
+            android:background="@null"
+            android:contentDescription="Toggle password" />
+    </LinearLayout>
+
+    <!-- Gumbi -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

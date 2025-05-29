@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/settingsToolbar"
             android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp" />
 
-
+        <!-- Header -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="300dp"
@@ -30,12 +30,14 @@
             android:scaleType="centerCrop"
             android:contentDescription="Settings header" />
 
+        <!-- Content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- Ime korisnika -->
             <TextView
                 android:id="@+id/userNameTextView"
                 android:layout_width="wrap_content"
@@ -48,6 +50,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:layout_marginTop="8dp" />
 
+            <!-- Email korisnika -->
             <TextView
                 android:id="@+id/userEmailTextView"
                 android:layout_width="wrap_content"
@@ -59,21 +62,45 @@
                 android:layout_marginBottom="24dp"
                 android:fontFamily="sans-serif" />
 
-
-            <EditText
-                android:id="@+id/newPasswordEditText"
+            <!-- Novi unos lozinke -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nova lozinka"
-                android:inputType="textPassword"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
                 android:background="@drawable/edittext_background"
+                android:gravity="center_vertical"
                 android:padding="12dp"
-                android:layout_marginBottom="12dp"
-                android:textColor="#212121"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif" />
+                android:layout_marginBottom="12dp">
 
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_password"
+                    android:contentDescription="Ikona lozinke" />
 
+                <EditText
+                    android:id="@+id/newPasswordEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Nova lozinka"
+                    android:inputType="textPassword"
+                    android:background="@null"
+                    android:paddingStart="8dp"
+                    android:textColor="#212121"
+                    android:textSize="16sp"
+                    android:fontFamily="sans-serif" />
+
+                <ImageButton
+                    android:id="@+id/passwordToggleSettings"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_visibility_off"
+                    android:background="@null"
+                    android:contentDescription="Toggle password" />
+            </LinearLayout>
+
+            <!-- Gumb za promjenu lozinke -->
             <Button
                 android:id="@+id/changePasswordButton"
                 android:layout_width="match_parent"
@@ -86,7 +113,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:layout_marginBottom="16dp" />
 
-
+            <!-- Gumb za brisanje računa -->
             <Button
                 android:id="@+id/deleteAccountButton"
                 android:layout_width="match_parent"
@@ -97,7 +124,6 @@
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium" />
-
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
