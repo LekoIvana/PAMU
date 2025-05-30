@@ -18,9 +18,9 @@ class ApprovedReservationsFragment : Fragment() {
 
     private val db = Firebase.firestore
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ApprovedReservationAdapter
     private lateinit var emptyMessage: TextView
-    private val reservations = mutableListOf<Reservation>()
+    private lateinit var adapter: GroupedReservationAdapter
+    private val groupedItems = mutableListOf<ReservationListItem>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,29 +32,26 @@ class ApprovedReservationsFragment : Fragment() {
         emptyMessage = view.findViewById(R.id.emptyMessage)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = ApprovedReservationAdapter(reservations)
+        adapter = GroupedReservationAdapter(groupedItems)
         recyclerView.adapter = adapter
 
         loadApprovedReservations()
         return view
     }
 
-    private fun loadApprovedReservations() {
+    fun loadApprovedReservations() {
         val currentDateTime = Calendar.getInstance().time
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val displayDateFormatter = SimpleDateFormat("EEEE, dd. MMMM yyyy.", Locale("hr"))
 
         db.collection("appointments")
             .whereEqualTo("status", "approved")
             .get()
             .addOnSuccessListener { snapshot ->
-                reservations.clear()
+                val validReservations = mutableListOf<Reservation>()
+                val toDelete = mutableListOf<String>()
 
-                val filteredList = snapshot.documents.sortedWith(compareBy(
-                    { it.getString("date") },
-                    { it.getString("time") }
-                ))
-
-                for (doc in filteredList) {
+                for (doc in snapshot) {
                     val id = doc.id
                     val date = doc.getString("date")
                     val time = doc.getString("time")
@@ -72,21 +69,42 @@ class ApprovedReservationsFragment : Fragment() {
                                     val user = doc.getString("userEmail") ?: ""
                                     val note = doc.getString("note") ?: ""
                                     val category = doc.getString("category") ?: ""
-                                    reservations.add(
+                                    validReservations.add(
                                         Reservation(id, date, time, user, note, category)
                                     )
                                 } else {
-                                    db.collection("appointments").document(id).delete()
+                                    toDelete.add(id)
                                 }
                             }
-                        } catch (e: Exception) {
-                            // skip if date/time parse fails
-                        }
+                        } catch (_: Exception) {}
+                    }
+                }
+
+                // Obriši stare rezervacije iz Firestore
+                toDelete.forEach { id ->
+                    db.collection("appointments").document(id).delete()
+                }
+
+                groupedItems.clear()
+
+                val groupedMap = validReservations.groupBy { it.date }
+
+                val sortedKeys = groupedMap.keys.sorted()
+                for (dateKey in sortedKeys) {
+                    val label = try {
+                        displayDateFormatter.format(SimpleDateFormat("yyyy-MM-dd").parse(dateKey)!!)
+                    } catch (e: Exception) {
+                        dateKey
+                    }
+
+                    groupedItems.add(ReservationListItem.DateHeader(label))
+                    groupedMap[dateKey]?.sortedBy { it.time }?.forEach { res ->
+                        groupedItems.add(ReservationListItem.ReservationItem(res))
                     }
                 }
 
                 adapter.notifyDataSetChanged()
-                emptyMessage.visibility = if (reservations.isEmpty()) View.VISIBLE else View.GONE
+                emptyMessage.visibility = if (groupedItems.isEmpty()) View.VISIBLE else View.GONE
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Greška pri dohvaćanju rezervacija", Toast.LENGTH_SHORT).show()

@@ -20,9 +20,11 @@ class PendingReservationsFragment : Fragment() {
 
     private val db = Firebase.firestore
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: ReservationAdapter
+    private lateinit var adapter: GroupedPendingReservationAdapter
     private lateinit var emptyMessage: TextView
-    private val reservations = mutableListOf<Reservation>()
+    private val items = mutableListOf<ReservationListItem>()
+    private val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private val dateLabelFormat = SimpleDateFormat("EEEE, dd. MMMM", Locale("hr"))
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,143 +36,131 @@ class PendingReservationsFragment : Fragment() {
         emptyMessage = view.findViewById(R.id.emptyMessage)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        adapter = ReservationAdapter(reservations,
-            onApprove = { id ->
-                val dialogView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.dialog_confirm_reservation_admin, null)
-
-                val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
-                val confirmButton = dialogView.findViewById<Button>(R.id.confirmButton)
-                val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
-
-                dialogMessage.text = "Želite li potvrditi ovu rezervaciju?"
-
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .create()
-
-                confirmButton.setOnClickListener {
-                    db.collection("appointments").document(id)
-                        .update("status", "approved")
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Rezervacija prihvaćena", Toast.LENGTH_SHORT).show()
-                            loadReservations()
-                        }
-                    dialog.dismiss()
-                }
-
-                cancelButton.setOnClickListener {
-                    dialog.dismiss()
-                }
-
-                dialog.show()
-            },
-            onReject = { id ->
-                val dialogView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.dialog_reject_reservation_admin, null)
-
-                val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
-                val confirmButton = dialogView.findViewById<Button>(R.id.confirmButton)
-                val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
-
-                dialogMessage.text = "Jeste li sigurni da želite odbiti ovu rezervaciju?"
-
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .create()
-
-                confirmButton.setOnClickListener {
-                    db.collection("appointments").document(id)
-                        .delete()
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Rezervacija odbijena", Toast.LENGTH_SHORT).show()
-                            loadReservations()
-                        }
-                    dialog.dismiss()
-                }
-
-                cancelButton.setOnClickListener {
-                    dialog.dismiss()
-                }
-
-                dialog.show()
-            }
+        adapter = GroupedPendingReservationAdapter(items,
+            onApprove = { id -> showApproveDialog(id) },
+            onReject = { id -> showRejectDialog(id) }
         )
-
         recyclerView.adapter = adapter
+
         loadReservations()
+
         return view
+    }
+
+    private fun showApproveDialog(id: String) {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_confirm_reservation_admin, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<TextView>(R.id.dialogMessage).text = "Želite li potvrditi ovu rezervaciju?"
+        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
+            db.collection("appointments").document(id)
+                .update("status", "approved")
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Rezervacija prihvaćena", Toast.LENGTH_SHORT).show()
+                    loadReservations()
+                    (requireActivity().supportFragmentManager.fragments).forEach { fragment ->
+                        if (fragment is ApprovedReservationsFragment) {
+                            fragment.loadApprovedReservations()
+                        }
+                    }
+
+                }
+            dialog.dismiss()
+        }
+        dialogView.findViewById<Button>(R.id.cancelButton).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showRejectDialog(id: String) {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_reject_reservation_admin, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<TextView>(R.id.dialogMessage).text = "Jeste li sigurni da želite odbiti ovu rezervaciju?"
+        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
+            db.collection("appointments").document(id)
+                .delete()
+                .addOnSuccessListener {
+                    Toast.makeText(requireContext(), "Rezervacija odbijena", Toast.LENGTH_SHORT).show()
+                    loadReservations()
+                }
+            dialog.dismiss()
+        }
+        dialogView.findViewById<Button>(R.id.cancelButton).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun loadReservations() {
         val currentDateTime = Calendar.getInstance().time
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
         db.collection("appointments")
             .whereEqualTo("status", "pending")
             .get()
             .addOnSuccessListener { snapshot ->
-                reservations.clear()
-
+                val reservations = mutableListOf<Reservation>()
                 val toDelete = mutableListOf<String>()
 
-                val filteredList = snapshot.documents.filter { doc ->
+                for (doc in snapshot.documents) {
+                    val id = doc.id
                     val date = doc.getString("date")
                     val time = doc.getString("time")
                     if (date != null && time != null) {
                         try {
                             val fullDateTime = formatter.parse("$date $time")
-                            fullDateTime?.let {
+                            if (fullDateTime != null) {
                                 val cal = Calendar.getInstance()
-                                cal.time = it
+                                cal.time = fullDateTime
                                 cal.add(Calendar.HOUR_OF_DAY, 1)
                                 val endTime = cal.time
                                 if (endTime.before(currentDateTime)) {
-                                    toDelete.add(doc.id)
-                                    false
+                                    toDelete.add(id)
                                 } else {
-                                    true
+                                    val user = doc.getString("userEmail") ?: ""
+                                    val note = doc.getString("note") ?: ""
+                                    val category = doc.getString("category") ?: ""
+                                    reservations.add(Reservation(id, date, time, user, note, category))
                                 }
-                            } ?: false
-                        } catch (e: Exception) {
-                            false
-                        }
-                    } else {
-                        false
+                            }
+                        } catch (_: Exception) {}
                     }
-                }.sortedWith(compareBy({ it.getString("date") }, { it.getString("time") }))
-
-                // Obriši zastarjele rezervacije
-                for (docId in toDelete) {
-                    db.collection("appointments").document(docId).delete()
                 }
 
-                for (doc in filteredList) {
-                    val id = doc.id
-                    val date = doc.getString("date") ?: ""
-                    val time = doc.getString("time") ?: ""
-                    val user = doc.getString("userEmail") ?: ""
-                    val note = doc.getString("note") ?: ""
-                    val category = doc.getString("category") ?: ""
-                    reservations.add(Reservation(id, date, time, user, note, category))
+                toDelete.forEach { db.collection("appointments").document(it).delete() }
+
+                val grouped = reservations
+                    .sortedWith(compareBy({ it.date }, { it.time }))
+                    .groupBy { it.date }
+
+                items.clear()
+                for ((date, resList) in grouped) {
+                    val dateLabel = try {
+                        val parsedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(date)
+                        dateLabelFormat.format(parsedDate ?: Date())
+                    } catch (_: Exception) {
+                        date
+                    }
+
+                    items.add(ReservationListItem.DateHeader(dateLabel))
+                    items.addAll(resList.map { ReservationListItem.ReservationItem(it) })
                 }
 
                 adapter.notifyDataSetChanged()
-                emptyMessage.visibility = if (reservations.isEmpty()) View.VISIBLE else View.GONE
+                emptyMessage.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 }
-
-data class Reservation(
-    val id: String,
-    val date: String,
-    val time: String,
-    val user: String,
-    val note: String,
-    val category: String
-)
-
-

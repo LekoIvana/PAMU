@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +22,8 @@ class UserReservationsFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyMessageText: TextView
-    private lateinit var adapter: UserReservationAdapter
-    private val reservations = mutableListOf<Reservation>()
+    private lateinit var adapter: GroupedUserReservationAdapter
+    private val groupedItems = mutableListOf<ReservationListItem>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,7 +36,7 @@ class UserReservationsFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = UserReservationAdapter(reservations) { reservationId ->
+        adapter = GroupedUserReservationAdapter(groupedItems) { reservationId ->
             showConfirmationDialog(reservationId)
         }
 
@@ -90,7 +92,8 @@ class UserReservationsFragment : Fragment() {
             .whereEqualTo("status", "approved")
             .get()
             .addOnSuccessListener { snapshot ->
-                reservations.clear()
+                val grouped = mutableMapOf<String, MutableList<Reservation>>()
+
                 for (doc in snapshot) {
                     val id = doc.id
                     val date = doc.getString("date") ?: ""
@@ -103,11 +106,22 @@ class UserReservationsFragment : Fragment() {
                         val user = doc.getString("userEmail") ?: ""
                         val note = doc.getString("note") ?: ""
                         val category = doc.getString("category") ?: ""
-                        reservations.add(Reservation(id, date, time, user, note, category))
+                        val reservation = Reservation(id, date, time, user, note, category)
+
+                        grouped.getOrPut(date) { mutableListOf() }.add(reservation)
                     }
                 }
+
+                groupedItems.clear()
+                grouped.toSortedMap().forEach { (date, reservations) ->
+                    groupedItems.add(ReservationListItem.DateHeader(date))
+                    reservations.sortedBy { it.time }.forEach { res ->
+                        groupedItems.add(ReservationListItem.ReservationItem(res))
+                    }
+                }
+
                 adapter.notifyDataSetChanged()
-                emptyMessageText.visibility = if (reservations.isEmpty()) View.VISIBLE else View.GONE
+                emptyMessageText.visibility = if (groupedItems.isEmpty()) View.VISIBLE else View.GONE
             }
     }
 }
