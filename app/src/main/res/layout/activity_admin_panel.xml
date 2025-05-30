@@ -11,7 +11,7 @@
         android:id="@+id/adminToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#ff9ddb"
+        android:background="#89135b"
         android:titleTextColor="#89135b"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
@@ -20,10 +20,10 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ff9ddb"
-        app:tabTextColor="#89135b"
-        app:tabSelectedTextColor="#89135b"
-        app:tabIndicatorColor="#89135b"
+        android:background="#89135b"
+        app:tabTextColor="#FFFFFF"
+        app:tabSelectedTextColor="#FFFFFF"
+        app:tabIndicatorColor="#FFFFFF"
         app:tabIndicatorHeight="3dp" />
 
     <!-- ViewPager2 -->

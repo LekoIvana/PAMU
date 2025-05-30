@@ -1,10 +1,14 @@
 package ba.sum.fpmoz.pamu
 
 import android.os.Bundle
+import androidx.core.content.ContextCompat
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -67,26 +71,44 @@ class UsersFragment : Fragment() {
     }
 
     private fun toggleRole(user: User) {
-        val options = arrayOf("user", "admin")
-        val currentRoleIndex = if (user.role == "admin") 1 else 0
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_change_role, null)
+        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.roleRadioGroup)
+        val radioUser = dialogView.findViewById<RadioButton>(R.id.radioUser)
+        val radioAdmin = dialogView.findViewById<RadioButton>(R.id.radioAdmin)
 
-        val builder = android.app.AlertDialog.Builder(requireContext())
-        builder.setTitle("Odaberi novu ulogu za ${user.userName}")
-        builder.setSingleChoiceItems(options, currentRoleIndex) { dialog, which ->
-            val selectedRole = options[which]
-            db.collection("users").document(user.uid)
-                .update("role", selectedRole)
-                .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Uloga promijenjena", Toast.LENGTH_SHORT).show()
-                    fetchUsers()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Greška pri izmjeni uloge", Toast.LENGTH_SHORT).show()
-                }
-            dialog.dismiss()
+        // Postavi trenutno označenu ulogu
+        if (user.role == "admin") {
+            radioAdmin.isChecked = true
+        } else {
+            radioUser.isChecked = true
         }
-        builder.setNegativeButton("Odustani") { dialog, _ -> dialog.dismiss() }
-        builder.show()
+
+        val alertDialog = android.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setNegativeButton("Odustani", null)
+            .setPositiveButton("Spremi") { _, _ ->
+                val selectedRole = if (radioAdmin.isChecked) "admin" else "user"
+                db.collection("users").document(user.uid)
+                    .update("role", selectedRole)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Uloga promijenjena", Toast.LENGTH_SHORT).show()
+                        fetchUsers()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Greška pri izmjeni uloge", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .create()
+
+        alertDialog.show()
+
+        alertDialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ?.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            ?.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
     }
+
 
 }

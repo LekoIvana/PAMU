@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/dialog_background">
+
+    <TextView
+        android:id="@+id/dialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Opcije za uslugu"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#212121"
+        android:paddingBottom="16dp" />
+
+    <TextView
+        android:id="@+id/optionEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Uredi"
+        android:textColor="#89135b"
+        android:textSize="16sp"
+        android:padding="12dp" />
+
+    <TextView
+        android:id="@+id/optionDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Obriši"
+        android:textColor="#89135b"
+        android:textSize="16sp"
+        android:padding="12dp" />
+</LinearLayout>

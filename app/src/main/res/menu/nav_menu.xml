@@ -34,7 +34,7 @@
     <item
         android:id="@+id/nav_admin_panel"
         android:title="Admin panel"
-        android:icon="@drawable/ic_settings" />
+        android:icon="@drawable/ic_admin_panel" />
 
 
     <!-- Zajedničke -->

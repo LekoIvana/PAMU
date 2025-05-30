@@ -3,8 +3,9 @@ package ba.sum.fpmoz.pamu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 
 class ServiceAdapter(
@@ -12,7 +13,7 @@ class ServiceAdapter(
     private val onEditClick: (Service) -> Unit,
     private val onDeleteClick: (Service) -> Unit,
     private val isAdmin: Boolean = true,
-    private val onItemClick: ((Service) -> Unit)? = null // 👈 dodano
+    private val onItemClick: ((Service) -> Unit)? = null // klik za obične korisnike
 ) : RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder>() {
 
     class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,17 +36,33 @@ class ServiceAdapter(
         holder.itemView.setOnClickListener {
             if (isAdmin) {
                 val context = holder.itemView.context
-                androidx.appcompat.app.AlertDialog.Builder(context)
-                    .setTitle("Opcije za '${service.name}'")
-                    .setItems(arrayOf("Uredi", "Obriši")) { _, which ->
-                        when (which) {
-                            0 -> onEditClick(service)
-                            1 -> onDeleteClick(service)
-                        }
-                    }
-                    .show()
+                val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_service_options, null)
+
+                val titleText = dialogView.findViewById<TextView>(R.id.dialogTitle)
+                val editOption = dialogView.findViewById<TextView>(R.id.optionEdit)
+                val deleteOption = dialogView.findViewById<TextView>(R.id.optionDelete)
+
+                titleText.text = "Opcije za '${service.name}'"
+
+                val dialog = AlertDialog.Builder(context)
+                    .setView(dialogView)
+                    .create()
+
+                dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+
+                editOption.setOnClickListener {
+                    dialog.dismiss()
+                    onEditClick(service)
+                }
+
+                deleteOption.setOnClickListener {
+                    dialog.dismiss()
+                    onDeleteClick(service)
+                }
+
+                dialog.show()
             } else {
-                onItemClick?.invoke(service) // 👈 klik za obične korisnike
+                onItemClick?.invoke(service)
             }
         }
     }
