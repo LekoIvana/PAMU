@@ -21,7 +21,7 @@ class AdminServicesFragment : Fragment() {
     private val serviceList = mutableListOf<Service>()
     private val db = FirebaseFirestore.getInstance()
 
-    // ✅ Launcher za dobivanje rezultata iz EditServiceActivity
+
     private val editServiceLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -57,21 +57,16 @@ class AdminServicesFragment : Fragment() {
             .addOnSuccessListener { result ->
                 serviceList.clear()
                 for (document in result) {
+                    val id = document.id
                     val name = document.getString("name") ?: ""
                     val description = document.getString("description") ?: ""
-                    val id = document.id
-
-                    val imageRes = when (name.lowercase()) {
-                        "šišanje" -> R.drawable.balayage
-                        "balayage" -> R.drawable.balayage
-                        else -> R.drawable.balayage
-                    }
+                    val imageUrl = document.getString("imageUrl") // učitavamo URL slike
 
                     val service = Service(
                         id = id,
                         name = name,
                         description = description,
-                        imageResId = imageRes
+                        imageUrl = imageUrl
                     )
                     serviceList.add(service)
                 }
@@ -87,8 +82,9 @@ class AdminServicesFragment : Fragment() {
         intent.putExtra("SERVICE_ID", service.id)
         intent.putExtra("SERVICE_NAME", service.name)
         intent.putExtra("SERVICE_DESC", service.description)
-        intent.putExtra("SERVICE_IMAGE", service.imageResId)
-        editServiceLauncher.launch(intent) // ✅ zamijenjeno startActivity()
+
+        intent.putExtra("SERVICE_IMAGE_URL", service.imageUrl)
+        editServiceLauncher.launch(intent)
     }
 
     private fun confirmDelete(service: Service) {

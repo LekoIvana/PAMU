@@ -16,22 +16,22 @@ class AdminPanelActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_panel)
 
-        // Toolbar
+
         val toolbar = findViewById<Toolbar>(R.id.adminToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Admin Panel"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
 
-        // TabLayout i ViewPager
+
         tabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
 
-        // Adapter za ViewPager
+
         val adapter = AdminPagerAdapter(this)
         viewPager.adapter = adapter
 
-        // Poveži TabLayout s ViewPager2
+
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = when (position) {
                 0 -> "Korisnici"

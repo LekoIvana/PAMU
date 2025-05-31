@@ -25,7 +25,7 @@ class EditServiceActivity : AppCompatActivity() {
         descriptionEditText = findViewById(R.id.editTextDescription)
         saveButton = findViewById(R.id.buttonSave)
 
-        // Primanje podataka
+
         serviceId = intent.getStringExtra("SERVICE_ID") ?: ""
         val serviceName = intent.getStringExtra("SERVICE_NAME") ?: ""
         val serviceDesc = intent.getStringExtra("SERVICE_DESC") ?: ""
@@ -43,7 +43,7 @@ class EditServiceActivity : AppCompatActivity() {
                 .update(updatedData)
                 .addOnSuccessListener {
                     Toast.makeText(this, "Usluga ažurirana", Toast.LENGTH_SHORT).show()
-                    setResult(RESULT_OK) // 🔄 ključna linija za osvježavanje u fragmentu
+                    setResult(RESULT_OK)
                     finish()
                 }
                 .addOnFailureListener {

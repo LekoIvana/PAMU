@@ -23,13 +23,14 @@ class WelcomeActivity : AppCompatActivity() {
     private lateinit var navigationView: NavigationView
     private lateinit var auth: FirebaseAuth
     private var isAdmin: Boolean = false
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
         auth = FirebaseAuth.getInstance()
-        val db = FirebaseFirestore.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -43,6 +44,21 @@ class WelcomeActivity : AppCompatActivity() {
         navigationView.menu.clear()
         navigationView.inflateMenu(R.menu.nav_menu)
 
+        setupUserRoleAndMenu()
+        setupNavigationHeader()
+        setupNavigationListener(toolbar)
+
+
+        loadServices(db)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        loadServices(db)
+    }
+
+    private fun setupUserRoleAndMenu() {
         val currentUserUid = auth.currentUser?.uid
         if (currentUserUid != null) {
             db.collection("users").document(currentUserUid).get()
@@ -64,21 +80,14 @@ class WelcomeActivity : AppCompatActivity() {
                         menu.findItem(R.id.nav_admin_panel)?.isVisible = false
                         menu.findItem(R.id.nav_dodaj_subuslugu)?.isVisible = false
                     }
-
-                    loadServices(db)
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Greška pri dohvaćanju uloge", Toast.LENGTH_SHORT).show()
                 }
         }
+    }
 
-        val toggle = androidx.appcompat.app.ActionBarDrawerToggle(
-            this, drawerLayout, toolbar,
-            R.string.navigation_drawer_open, R.string.navigation_drawer_close
-        )
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
+    private fun setupNavigationHeader() {
         val headerView = navigationView.getHeaderView(0)
         val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
         val navUserEmail = headerView.findViewById<TextView>(R.id.navUserEmail)
@@ -97,6 +106,15 @@ class WelcomeActivity : AppCompatActivity() {
                     navUserEmail.text = user.email ?: "email@primjer.com"
                 }
         }
+    }
+
+    private fun setupNavigationListener(toolbar: Toolbar) {
+        val toggle = androidx.appcompat.app.ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open, R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
 
         navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
@@ -145,9 +163,16 @@ class WelcomeActivity : AppCompatActivity() {
                     val id = document.id
                     val name = document.getString("name") ?: "N/A"
                     val description = document.getString("description") ?: ""
-                    val imageRes = R.drawable.balayage
+                    val imageUrl = document.getString("imageUrl")
 
-                    services.add(Service(id = id, name = name, description = description, imageResId = imageRes))
+                    val service = if (!imageUrl.isNullOrEmpty()) {
+                        // Ako postoji URL slike u bazi, koristi ga
+                        Service(id = id, name = name, description = description, imageUrl = imageUrl)
+                    } else {
+                        // Ako nema URL-a, koristi default drawable
+                        Service(id = id, name = name, description = description, imageResId = R.drawable.balayage)
+                    }
+                    services.add(service)
                 }
 
                 recyclerView.adapter = ServiceAdapter(
@@ -168,7 +193,7 @@ class WelcomeActivity : AppCompatActivity() {
                                 .delete()
                                 .addOnSuccessListener {
                                     Toast.makeText(this, "Usluga obrisana", Toast.LENGTH_SHORT).show()
-                                    loadServices(db)
+                                    loadServices(db) // osvježi listu nakon brisanja
                                 }
                                 .addOnFailureListener {
                                     Toast.makeText(this, "Greška pri brisanju", Toast.LENGTH_SHORT).show()

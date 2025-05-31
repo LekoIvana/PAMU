@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Toolbar s back strelicom -->
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/locationToolbar"
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         app:navigationIcon="@drawable/ic_back"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <!-- ScrollView sadržaj -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -30,7 +30,7 @@
             android:padding="24dp"
             android:gravity="center_horizontal">
 
-            <!-- Naslov -->
+
             <TextView
                 android:id="@+id/titleText"
                 android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:paddingBottom="24dp" />
 
-            <!-- Krug sa screenshotom lokacije -->
+
             <ImageView
                 android:id="@+id/mapImage"
                 android:layout_width="180dp"
@@ -54,7 +54,7 @@
                 android:clipToOutline="true"
                 android:contentDescription="Lokacija salona" />
 
-            <!-- Adresa -->
+
             <TextView
                 android:id="@+id/addressText"
                 android:layout_width="wrap_content"
@@ -67,7 +67,7 @@
                 android:paddingBottom="24dp"
                 android:fontFamily="sans-serif" />
 
-            <!-- Gumb za otvaranje Mapsa -->
+
             <Button
                 android:id="@+id/openMapBtn"
                 android:layout_width="wrap_content"

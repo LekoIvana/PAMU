@@ -1,19 +1,25 @@
 package ba.sum.fpmoz.pamu
 
+import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import ba.sum.fpmoz.pamu.R
+import kotlin.concurrent.thread
+import java.net.URL
 
 class ServiceAdapter(
     private val services: List<Service>,
     private val onEditClick: (Service) -> Unit,
     private val onDeleteClick: (Service) -> Unit,
     private val isAdmin: Boolean = true,
-    private val onItemClick: ((Service) -> Unit)? = null // klik za obične korisnike
+    private val onItemClick: ((Service) -> Unit)? = null
 ) : RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder>() {
 
     class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -31,7 +37,31 @@ class ServiceAdapter(
         val service = services[position]
         holder.nameText.text = service.name
         holder.descText.text = service.description
-        holder.imageView.setImageResource(service.imageResId)
+
+        val imageUrl = service.imageUrl
+        if (!imageUrl.isNullOrEmpty()) {
+            // Učitavanje slike iz URL-a u pozadinskoj niti
+            thread {
+                try {
+                    val inputStream = URL(imageUrl).openStream()
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream.close()
+
+                    Handler(Looper.getMainLooper()).post {
+                        holder.imageView.setImageBitmap(bitmap)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Handler(Looper.getMainLooper()).post {
+                        // Ako ne uspije učitati, prikaži balayage sliku iz drawable
+                        holder.imageView.setImageResource(R.drawable.balayage)
+                    }
+                }
+            }
+        } else {
+            // Ako nema URL slike, prikaži balayage
+            holder.imageView.setImageResource(R.drawable.balayage)
+        }
 
         holder.itemView.setOnClickListener {
             if (isAdmin) {

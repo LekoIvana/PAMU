@@ -6,16 +6,19 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Toolbar -->
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/adminToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="#89135b"
-        android:titleTextColor="#89135b"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+        android:title="Admin panel"
+        android:titleTextColor="#FFFFFF"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="@drawable/ic_back" />
 
-    <!-- TabLayout -->
+
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
@@ -26,7 +29,7 @@
         app:tabIndicatorColor="#FFFFFF"
         app:tabIndicatorHeight="3dp" />
 
-    <!-- ViewPager2 -->
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"

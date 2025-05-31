@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import ba.sum.fpmoz.pamu.model.Usluga
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AddSubserviceActivity : AppCompatActivity() {
@@ -14,29 +13,36 @@ class AddSubserviceActivity : AppCompatActivity() {
     private lateinit var etCijena: EditText
     private lateinit var btnSpremi: Button
 
+
+    private val kategorijeMap = mutableMapOf<String, String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_subservice)
 
-        // Inicijalizacija UI elemenata
         autoKategorija = findViewById(R.id.autoKategorija)
         etNaziv = findViewById(R.id.etNaziv)
         etCijena = findViewById(R.id.etCijena)
         btnSpremi = findViewById(R.id.btnSpremi)
 
-        // Toolbar s bijelim naslovom i strelicom
         val toolbar = findViewById<Toolbar>(R.id.addSubserviceToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Dodaj poduslugu"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
 
-        // Učitaj kategorije iz Firestore (polje "name")
         val db = FirebaseFirestore.getInstance()
+
         db.collection("services")
             .get()
             .addOnSuccessListener { result ->
-                val kategorije = result.documents.mapNotNull { it.getString("name") }
+                val kategorije = mutableListOf<String>()
+                for (doc in result) {
+                    val name = doc.getString("name") ?: ""
+                    val id = doc.id
+                    kategorije.add(name)
+                    kategorijeMap[name] = id
+                }
 
                 if (kategorije.isEmpty()) {
                     Toast.makeText(this, "Nema pronađenih kategorija", Toast.LENGTH_SHORT).show()
@@ -53,31 +59,42 @@ class AddSubserviceActivity : AppCompatActivity() {
                 Toast.makeText(this, "Greška pri dohvaćanju kategorija", Toast.LENGTH_SHORT).show()
             }
 
-        // Spremi novu poduslugu
         btnSpremi.setOnClickListener {
-            val kategorija = autoKategorija.text.toString().trim().lowercase()
+            val kategorijaNaziv = autoKategorija.text.toString().trim()
             val naziv = etNaziv.text.toString().trim()
             val cijena = etCijena.text.toString().toIntOrNull()
 
-            if (kategorija.isEmpty() || naziv.isEmpty() || cijena == null) {
-                Toast.makeText(this, "Popuni sva polja!", Toast.LENGTH_SHORT).show()
+            if (kategorijaNaziv.isEmpty() || naziv.isEmpty() || cijena == null) {
+                Toast.makeText(this, "Popunite sva polja!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val novaUsluga = Usluga(naziv, cijena)
-            dodajUsluguFirestore(kategorija, novaUsluga)
+            val kategorijaId = kategorijeMap[kategorijaNaziv]
+            if (kategorijaId == null) {
+                Toast.makeText(this, "Odaberite validnu kategoriju!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            dodajPoduslugu(kategorijaId, naziv, cijena)
         }
     }
 
-    private fun dodajUsluguFirestore(kategorija: String, usluga: Usluga) {
+    private fun dodajPoduslugu(serviceId: String, naziv: String, cijena: Int) {
         val db = FirebaseFirestore.getInstance()
+        val subserviceId = naziv.replace(" ", "_").lowercase()
+
+        val podusluga = hashMapOf(
+            "name" to naziv,
+            "price" to cijena
+        )
+
         db.collection("services")
-            .document(kategorija)
-            .collection("usluge")
-            .document(usluga.naziv.replace(" ", "_").lowercase())
-            .set(usluga)
+            .document(serviceId)
+            .collection("subservices")
+            .document(subserviceId)
+            .set(podusluga)
             .addOnSuccessListener {
-                Toast.makeText(this, "Uspješno dodano u $kategorija!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Podusluga uspješno dodana", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener { e ->
@@ -85,4 +102,3 @@ class AddSubserviceActivity : AppCompatActivity() {
             }
     }
 }
-

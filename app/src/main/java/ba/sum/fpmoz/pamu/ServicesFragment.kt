@@ -2,9 +2,6 @@ package ba.sum.fpmoz.pamu
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +18,7 @@ class ServicesFragment : Fragment() {
     private val serviceList = mutableListOf<Service>()
     private val db = FirebaseFirestore.getInstance()
 
-    // ✅ ActivityResultLauncher za osvježavanje nakon uređivanja
+
     private val editServiceLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -31,9 +28,10 @@ class ServicesFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: android.view.LayoutInflater,
+        container: android.view.ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): android.view.View? {
         val view = inflater.inflate(R.layout.fragment_services, container, false)
 
         recyclerView = view.findViewById(R.id.servicesRecyclerView)
@@ -83,8 +81,28 @@ class ServicesFragment : Fragment() {
                     val id = document.id
                     val name = document.getString("name") ?: "N/A"
                     val description = document.getString("description") ?: ""
-                    val imageRes = R.drawable.balayage
-                    serviceList.add(Service(id = id, name = name, description = description, imageResId = imageRes))
+                    val imageUrl = document.getString("imageUrl")
+
+                    if (!imageUrl.isNullOrEmpty()) {
+                        serviceList.add(
+                            Service(
+                                id = id,
+                                name = name,
+                                description = description,
+                                imageUrl = imageUrl,
+                                imageResId = 0
+                            )
+                        )
+                    } else {
+                        serviceList.add(
+                            Service(
+                                id = id,
+                                name = name,
+                                description = description,
+                                imageResId = R.drawable.balayage
+                            )
+                        )
+                    }
                 }
                 serviceAdapter.notifyDataSetChanged()
             }
