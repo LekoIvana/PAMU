@@ -3,6 +3,7 @@ package ba.sum.fpmoz.pamu
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +29,8 @@ class ReservationsActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
 
     private val allTimes = listOf("09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00")
-    private var selectedCategory = ""
+    private var selectedCategoryName = ""
+    private var selectedCategoryId = ""
     private var selectedDate = ""
     private var selectedTime: String? = null
     private var selectedSubservice: String? = null
@@ -53,17 +55,78 @@ class ReservationsActivity : AppCompatActivity() {
         timeListView.visibility = View.GONE
         subserviceSpinner.visibility = View.GONE
 
-        selectedCategory = intent.getStringExtra("selectedCategory") ?: "Nepoznata"
+        selectedCategoryName = intent.getStringExtra("selectedCategory") ?: "Nepoznata"
 
         val toolbar = findViewById<Toolbar>(R.id.reservationsToolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "$selectedCategory"
+        supportActionBar?.title = selectedCategoryName
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
+        // Prvo dohvatiti ID kategorije iz naziva
+        fetchCategoryIdByName(selectedCategoryName) { categoryId ->
+            if (categoryId != null) {
+                selectedCategoryId = categoryId
+                // Sada može nastaviti s postavljanjem listenera i omogućiti odabir datuma
+                setupCalendar()
+            } else {
+                Toast.makeText(this, "Kategorija nije pronađena", Toast.LENGTH_LONG).show()
+                finish() // ili drugačije postupanje
+            }
+        }
+
+        // Listener na spinneru za podusluge
+        subserviceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val subservice = parent.getItemAtPosition(position) as Subservice
+                selectedSubservice = subservice.name
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                selectedSubservice = null
+            }
+        }
+
+        submitReservationButton.setOnClickListener {
+            if (selectedTime.isNullOrEmpty()) {
+                Toast.makeText(this, "Odaberite termin iz liste", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedSubservice.isNullOrEmpty()) {
+                Toast.makeText(this, "Odaberite uslugu", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val dialogView = layoutInflater.inflate(R.layout.dialog_confirm_reservation, null)
+            val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
+            val cancelBtn = dialogView.findViewById<Button>(R.id.cancelButton)
+            val confirmBtn = dialogView.findViewById<Button>(R.id.confirmButton)
+
+            dialogMessage.text = "Želite li rezervirati $selectedTime za $selectedDate?\nUsluga: $selectedSubservice"
+
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            cancelBtn.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            confirmBtn.setOnClickListener {
+                reserveAppointment(selectedTime!!, selectedSubservice!!)
+                dialog.dismiss()
+            }
+
+            dialog.show()
+        }
+    }
+
+    private fun setupCalendar() {
         val today = Calendar.getInstance()
         calendarView.setDate(today.timeInMillis, false, true)
 
@@ -115,57 +178,30 @@ class ReservationsActivity : AppCompatActivity() {
             subserviceSpinner.visibility = View.VISIBLE
             submitReservationButton.visibility = View.VISIBLE
         }
+    }
 
-        subserviceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val subservice = parent.getItemAtPosition(position) as Subservice
-                selectedSubservice = subservice.name
+    private fun fetchCategoryIdByName(categoryName: String, callback: (String?) -> Unit) {
+        db.collection("services")
+            .whereEqualTo("name", categoryName)
+            .get()
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    Log.d("ReservationsActivity", "Category ID found: ${result.documents[0].id}")
+                    callback(result.documents[0].id)
+                } else {
+                    Log.d("ReservationsActivity", "Category not found for name: $categoryName")
+                    callback(null)
+                }
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                selectedSubservice = null
+            .addOnFailureListener {
+                Log.e("ReservationsActivity", "Error fetching category ID", it)
+                callback(null)
             }
-        }
-
-        submitReservationButton.setOnClickListener {
-            if (selectedTime.isNullOrEmpty()) {
-                Toast.makeText(this, "Odaberite termin iz liste", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (selectedSubservice.isNullOrEmpty()) {
-                Toast.makeText(this, "Odaberite uslugu", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val dialogView = layoutInflater.inflate(R.layout.dialog_confirm_reservation, null)
-            val dialogMessage = dialogView.findViewById<TextView>(R.id.dialogMessage)
-            val cancelBtn = dialogView.findViewById<Button>(R.id.cancelButton)
-            val confirmBtn = dialogView.findViewById<Button>(R.id.confirmButton)
-
-            dialogMessage.text = "Želite li rezervirati $selectedTime za $selectedDate?\nUsluga: $selectedSubservice"
-
-            val dialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create()
-
-            cancelBtn.setOnClickListener {
-                dialog.dismiss()
-            }
-
-            confirmBtn.setOnClickListener {
-                reserveAppointment(selectedTime!!, selectedSubservice!!)
-                dialog.dismiss()
-            }
-
-            dialog.show()
-        }
     }
 
     private fun loadAvailableTimes() {
         db.collection("appointments")
-            .whereEqualTo("category", selectedCategory)
+            .whereEqualTo("category", selectedCategoryId)
             .whereEqualTo("date", selectedDate)
             .get()
             .addOnSuccessListener { snapshot ->
@@ -189,13 +225,13 @@ class ReservationsActivity : AppCompatActivity() {
 
     private fun loadSubservices() {
         db.collection("services")
-            .document(selectedCategory)
-            .collection("usluge")
+            .document(selectedCategoryId)
+            .collection("subservices")
             .get()
             .addOnSuccessListener { result ->
                 val subservices = result.mapNotNull {
-                    val name = it.getString("naziv") ?: return@mapNotNull null
-                    val price = it.getLong("cijena") ?: return@mapNotNull null
+                    val name = it.getString("name") ?: return@mapNotNull null
+                    val price = it.getLong("price") ?: return@mapNotNull null
                     Subservice(name, price)
                 }
                 if (subservices.isNotEmpty()) {
@@ -228,14 +264,14 @@ class ReservationsActivity : AppCompatActivity() {
         val email = auth.currentUser?.email ?: return
 
         db.collection("appointments")
-            .whereEqualTo("category", selectedCategory)
+            .whereEqualTo("category", selectedCategoryId)
             .whereEqualTo("date", selectedDate)
             .whereEqualTo("time", time)
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.isEmpty) {
                     val appointment = hashMapOf(
-                        "category" to selectedCategory,
+                        "category" to selectedCategoryId,
                         "date" to selectedDate,
                         "time" to time,
                         "userEmail" to email,
