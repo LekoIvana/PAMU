@@ -4,10 +4,8 @@ import android.Manifest
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -31,6 +29,7 @@ class AddServiceActivity : AppCompatActivity() {
     private lateinit var saveServiceBtn: Button
     private lateinit var serviceNameInput: EditText
     private lateinit var serviceDescriptionInput: EditText
+    private lateinit var uploadProgressBar: ProgressBar
 
     private var selectedImageUri: Uri? = null
     private var isUploading = false
@@ -63,6 +62,7 @@ class AddServiceActivity : AppCompatActivity() {
         saveServiceBtn = findViewById(R.id.saveServiceBtn)
         serviceNameInput = findViewById(R.id.serviceNameInput)
         serviceDescriptionInput = findViewById(R.id.serviceDescriptionInput)
+        uploadProgressBar = findViewById(R.id.uploadProgressBar)
 
         selectImageButton.setOnClickListener {
             checkPermissionAndOpenGallery()
@@ -118,6 +118,7 @@ class AddServiceActivity : AppCompatActivity() {
             isUploading = true
             saveServiceBtn.isEnabled = false
             selectImageButton.isEnabled = false
+            uploadProgressBar.visibility = View.VISIBLE
 
             val bucket = "usluge"
             val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
@@ -146,7 +147,7 @@ class AddServiceActivity : AppCompatActivity() {
             )
 
             val db = FirebaseFirestore.getInstance()
-            val serviceId = name.lowercase().replace(" ", "_") // Čitljiv i jedinstven ID
+            val serviceId = name.lowercase().replace(" ", "_")
 
             db.collection("services").document(serviceId).set(service)
                 .addOnSuccessListener {
@@ -157,6 +158,9 @@ class AddServiceActivity : AppCompatActivity() {
                     Toast.makeText(this@AddServiceActivity, "Greška pri spremanju usluge", Toast.LENGTH_SHORT).show()
                     resetUi()
                 }
+                .addOnCompleteListener {
+                    uploadProgressBar.visibility = View.GONE
+                }
         }
     }
 
@@ -164,5 +168,6 @@ class AddServiceActivity : AppCompatActivity() {
         isUploading = false
         saveServiceBtn.isEnabled = true
         selectImageButton.isEnabled = true
+        uploadProgressBar.visibility = View.GONE
     }
 }

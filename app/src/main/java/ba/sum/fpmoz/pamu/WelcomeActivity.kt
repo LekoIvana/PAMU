@@ -166,10 +166,10 @@ class WelcomeActivity : AppCompatActivity() {
                     val imageUrl = document.getString("imageUrl")
 
                     val service = if (!imageUrl.isNullOrEmpty()) {
-                        // Ako postoji URL slike u bazi, koristi ga
+
                         Service(id = id, name = name, description = description, imageUrl = imageUrl)
                     } else {
-                        // Ako nema URL-a, koristi default drawable
+
                         Service(id = id, name = name, description = description, imageResId = R.drawable.balayage)
                     }
                     services.add(service)
@@ -193,7 +193,7 @@ class WelcomeActivity : AppCompatActivity() {
                                 .delete()
                                 .addOnSuccessListener {
                                     Toast.makeText(this, "Usluga obrisana", Toast.LENGTH_SHORT).show()
-                                    loadServices(db) // osvježi listu nakon brisanja
+                                    loadServices(db)
                                 }
                                 .addOnFailureListener {
                                     Toast.makeText(this, "Greška pri brisanju", Toast.LENGTH_SHORT).show()

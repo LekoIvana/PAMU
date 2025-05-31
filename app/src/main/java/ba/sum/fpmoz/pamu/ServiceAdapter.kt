@@ -1,8 +1,5 @@
 package ba.sum.fpmoz.pamu
 
-import android.graphics.BitmapFactory
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,8 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import ba.sum.fpmoz.pamu.R
-import kotlin.concurrent.thread
-import java.net.URL
+import com.bumptech.glide.Glide
 
 class ServiceAdapter(
     private val services: List<Service>,
@@ -40,26 +36,12 @@ class ServiceAdapter(
 
         val imageUrl = service.imageUrl
         if (!imageUrl.isNullOrEmpty()) {
-            // Učitavanje slike iz URL-a u pozadinskoj niti
-            thread {
-                try {
-                    val inputStream = URL(imageUrl).openStream()
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    inputStream.close()
-
-                    Handler(Looper.getMainLooper()).post {
-                        holder.imageView.setImageBitmap(bitmap)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Handler(Looper.getMainLooper()).post {
-                        // Ako ne uspije učitati, prikaži balayage sliku iz drawable
-                        holder.imageView.setImageResource(R.drawable.balayage)
-                    }
-                }
-            }
+            Glide.with(holder.imageView.context)
+                .load(imageUrl)
+                .placeholder(R.drawable.balayage)
+                .error(R.drawable.balayage)
+                .into(holder.imageView)
         } else {
-            // Ako nema URL slike, prikaži balayage
             holder.imageView.setImageResource(R.drawable.balayage)
         }
 

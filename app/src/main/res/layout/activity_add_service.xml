@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Toolbar kao u Settings -->
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/addServiceToolbar"
             android:layout_width="match_parent"
@@ -35,7 +35,6 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Naziv usluge -->
             <EditText
                 android:id="@+id/serviceNameInput"
                 android:layout_width="match_parent"
@@ -49,7 +48,6 @@
                 android:layout_marginBottom="16dp"
                 android:fontFamily="sans-serif" />
 
-            <!-- Opis usluge -->
             <EditText
                 android:id="@+id/serviceDescriptionInput"
                 android:layout_width="match_parent"
@@ -64,7 +62,6 @@
                 android:layout_marginBottom="24dp"
                 android:fontFamily="sans-serif" />
 
-            <!-- Gumb za odabir slike -->
             <Button
                 android:id="@+id/selectImageButton"
                 android:layout_width="match_parent"
@@ -77,7 +74,6 @@
                 android:fontFamily="sans-serif-medium"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Prikaz odabrane slike -->
             <ImageView
                 android:id="@+id/selectedImageView"
                 android:layout_width="match_parent"
@@ -86,7 +82,16 @@
                 android:contentDescription="Odabrana slika"
                 android:layout_marginBottom="24dp" />
 
-            <!-- Gumb za spremanje -->
+
+            <ProgressBar
+                android:id="@+id/uploadProgressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp" />
+
             <Button
                 android:id="@+id/saveServiceBtn"
                 android:layout_width="match_parent"

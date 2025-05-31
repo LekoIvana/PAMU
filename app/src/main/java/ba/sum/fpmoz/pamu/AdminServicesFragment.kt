@@ -60,7 +60,7 @@ class AdminServicesFragment : Fragment() {
                     val id = document.id
                     val name = document.getString("name") ?: ""
                     val description = document.getString("description") ?: ""
-                    val imageUrl = document.getString("imageUrl") // učitavamo URL slike
+                    val imageUrl = document.getString("imageUrl")
 
                     val service = Service(
                         id = id,

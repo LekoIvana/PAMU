@@ -60,7 +60,6 @@ class SettingsActivity : AppCompatActivity() {
                 }
         }
 
-        // Prikaz/sakrivanje lozinke
         passwordToggleSettings.setOnClickListener {
             isPasswordVisible = !isPasswordVisible
             if (isPasswordVisible) {
@@ -73,7 +72,7 @@ class SettingsActivity : AppCompatActivity() {
             newPasswordEditText.setSelection(newPasswordEditText.text?.length ?: 0)
         }
 
-        // Promjena lozinke
+
         changePasswordButton.setOnClickListener {
             val newPassword = newPasswordEditText.text.toString()
             if (newPassword.length < 6) {
@@ -90,7 +89,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        // Dijalog za potvrdu brisanja računa
+
         deleteAccountButton.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.dialog_delete_account, null)
             val alertDialog = android.app.AlertDialog.Builder(this)

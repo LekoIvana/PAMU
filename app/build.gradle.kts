@@ -60,20 +60,22 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
 
-    // Supabase 3.0.0 dependencies
+
     implementation(platform("io.github.jan-tennert.supabase:bom:3.0.0"))
     implementation("io.github.jan-tennert.supabase:storage-kt")
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
 
-    // Ktor 3.0.0 dependencies potrebni za Supabase 3
+
     implementation("io.ktor:ktor-client-android:3.0.0-rc-1")
     implementation("io.ktor:ktor-client-core:3.0.0-rc-1")
 
-    // Serialization
+
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
-    // Desugaring libs
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+
+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
     testImplementation(libs.junit)
